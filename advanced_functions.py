@@ -1,5 +1,8 @@
+from .var import set_value_accuracy, set_error_accuracy, set_big_number, normalize
+from .table import rus_tex_formula
 from numpy import linspace as _linspace
 
+_very_useful_funcs = [set_value_accuracy, set_error_accuracy, set_big_number, rus_tex_formula, normalize]
 
 def parabola_coefficients(x1, x2, x3, y1, y2, y3):
     # ax^2+bx+c
