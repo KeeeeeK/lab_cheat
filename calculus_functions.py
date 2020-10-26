@@ -5,17 +5,18 @@ import sympy as sp
 import numpy as np
 
 
-def _mono_function(x, name_func: str, name_func_for_numpy: str = None,
+def _mono_function(x, name_func_for_sympy: str, name_func_for_numpy: str = None,
                    real_name: str = None):
+    """This function helps to make functions of one variable"""
     if name_func_for_numpy is None:
-        name_func_for_numpy = name_func
+        name_func_for_numpy = name_func_for_sympy
     if real_name is None:
-        real_name = name_func
+        real_name = name_func_for_sympy
 
     if isinstance(x, GroupVar):
         return GroupVar(tuple(_all_funcs[real_name](var) for var in x))
     if isinstance(x, Var):
-        return Var(getattr(sp, name_func)(x._story))
+        return Var(getattr(sp, name_func_for_sympy)(x._story))
     else:
         return getattr(np, name_func_for_numpy)(x)
 
@@ -113,4 +114,6 @@ _all_funcs = {'sqrt': sqrt, 'sin': sin, 'cos': cos, 'tg': tg, 'ctg': ctg, 'arctg
               'arcsh': arcch, 'exp': exp, 'ln': ln, 'mean': mean}
 
 def step(x: GroupVar):
+    """Gives just a difference between variables (x[i]-x[i-1]).
+    Sometimes it's better to use 'mnk'"""
     return GroupVar(tuple(x[i]-x[i-1] for i in range(1, len(x))))
