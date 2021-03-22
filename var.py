@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 from functools import total_ordering
-from typing import Sequence, SupportsFloat, Dict, List, Union, overload, Callable, Optional, Tuple
+from typing import Sequence, SupportsFloat, Dict, List, Union, overload, Callable, Optional, Tuple, Iterable
 from warnings import catch_warnings, simplefilter
 
 from numpy import sqrt, array, diag, isnan
@@ -172,6 +172,7 @@ class GroupVar:
     The only slot in this class is 'variables'. It's a list containing Vars.
     (To read documentation to this class, it's necessary to understand the same methods in Var class.)
     """
+
     @overload
     def __init__(self, variables: Sequence[Var], exp=0):
         """
@@ -208,8 +209,10 @@ class GroupVar:
             if len(values) != len(errors):
                 raise TypeError('Arguments must be the same length')
             self.variables: List[Var] = [Var(val, err) * 10 ** exp for val, err in zip(values, errors)]
-        else:
+        elif isinstance(args[0][0], Var):
             self.variables: List[Var] = [var * 10 ** exp for var in args[0]]
+        else:
+            raise TypeError('Unexpected type of arguments')
 
     def val_err(self) -> Tuple[Tuple[float, ...], Tuple[float, ...]]:
         """
@@ -229,13 +232,16 @@ class GroupVar:
         """
         return [var.err() for var in self.variables]
 
-    def __getitem__(self, item: Union[int, slice]):
+    def __getitem__(self, item: Union[int, slice, Iterable[int]]):
         """
         If type of item is 'int', then returns self.variables[item].
         If type of item is 'slice', then returns GroupVar(self.variables[item])
+        If type of item is 'List[int]', then returns GroupVar([self.variables[i] for i in item])
         """
         if isinstance(item, slice):
             return GroupVar(self.variables[item])
+        if hasattr(item, '__iter__'):
+            return GroupVar([self.variables[i] for i in item])
         return self.variables[item]
 
     def __iter__(self):
@@ -290,6 +296,7 @@ class GroupVar:
 
     def __neg__(self) -> GroupVar:
         return GroupVar([-var for var in self.variables])
+
 
 TypicalArgument = Union[SupportsFloat, Var, GroupVar]
 
