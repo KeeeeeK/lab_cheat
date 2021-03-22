@@ -114,6 +114,6 @@ _all_funcs = {'sqrt': sqrt, 'sin': sin, 'cos': cos, 'tg': tg, 'ctg': ctg, 'arctg
               'arcsh': arcch, 'exp': exp, 'ln': ln, 'mean': mean}
 
 def step(x: GroupVar):
-    """Gives just a difference between variables (x[i]-x[i-1]).
+    """Gives just a difference between variables (xt[i]-xt[i-1]).
     Sometimes it's better to use 'mnk'"""
     return GroupVar(tuple(x[i]-x[i-1] for i in range(1, len(x))))
