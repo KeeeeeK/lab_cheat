@@ -1,4 +1,4 @@
-from math import pi
+from numpy import pi, array
 from .var import Var, GroupVar
 from .table import TexTable, to_table
 from .plot import Figure, mnk, mnk_through0
