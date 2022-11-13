@@ -1,11 +1,13 @@
 import sys as _sys
 from typing import SupportsFloat, Tuple, Union, List, Callable, Optional, Sequence
 
+import numpy as np
 from numpy import argmin as _argmin
 from numpy import argsort as _argsort
 from numpy import var as _var
 from scipy.interpolate import UnivariateSpline as _UnivariateSpline
 from scipy.optimize import fmin as _fmin
+from scipy.optimize import curve_fit as _curve_fit
 
 from lab_cheat import *
 from .table import rus_tex_formula
@@ -119,6 +121,7 @@ def smoothing(x: Union[array, List, GroupVar], y: Union[array, List, GroupVar], 
 def fmin(f: Callable, x0: Union[Var, SupportsFloat], x: Optional[GroupVar] = None, y: Optional[GroupVar] = None) \
         -> Union[Var, SupportsFloat]:
     """
+    fmin is for very accurate search of minimum of known graph
     :param f: function to minimize
     :param x0: dot near minimum
     :params x and y to find the error accurately
@@ -134,7 +137,7 @@ def fmin(f: Callable, x0: Union[Var, SupportsFloat], x: Optional[GroupVar] = Non
         x, y = sorting(x, y)
         i_min = sorted(list(x.val()) + [x_min]).index(x_min)
         if i_min == len(x):
-            f_min, y_err, err = f(x_min), y[i_min-1].err(), x[i_min-1].err()
+            f_min, y_err, err = f(x_min), y[i_min - 1].err(), x[i_min - 1].err()
         else:
             f_min, y_err, err = f(x_min), y[i_min].err(), x[i_min].err()
         x_err_approx = sqrt(2 * y_err / (f(x_min + err) + f(x_min - err) - 2 * f_min)) * err
@@ -148,6 +151,15 @@ def fmin(f: Callable, x0: Union[Var, SupportsFloat], x: Optional[GroupVar] = Non
 def fmax(f: Callable, x0: Union[Var, SupportsFloat], x: Optional[GroupVar] = None, y: Optional[GroupVar] = None) \
         -> Union[Var, SupportsFloat]:
     return fmin(lambda t: -f(t), x0, x=x, y=y)
+
+
+def curve_fit(f: Callable, x: GroupVar, y: GroupVar, p0: Optional[Sequence[SupportsFloat]] = None):
+    """unfortunately, ignores x.err()"""
+    initial_p = None if p0 is None else np.array(p0)
+    too_small_err = np.any(np.asarray(y.err()) < 1/np.finfo(np.float_).max)
+    sigma = None if too_small_err else y.err()
+    p_opt, p_cov = _curve_fit(f, xdata=x.val(), ydata=y.val(), p0=initial_p, sigma=sigma)
+    return GroupVar(p_opt, np.diag(p_cov))
 
 
 def sigma(variable: Union[GroupVar, Sequence]):
