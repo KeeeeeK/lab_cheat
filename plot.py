@@ -12,7 +12,7 @@ from .var import Var, GroupVar
 
 class Figure:
     """
-    This class is made to show graphs
+    Данный класс используется для работы с графиками
     """
 
     def __init__(self, x_label: str = '', y_label: str = '', bold_axes: bool = True, zero_in_corner: bool = True,
@@ -115,7 +115,7 @@ class Figure:
 
     def show(self):
         """
-        Generates matplotlib.Figure and shows it.
+        Создаёт окно мат плот либа и рисует в нём всё, что было в объекте
         :return: None
         """
         axes = plt.figure().add_subplot()
@@ -226,12 +226,13 @@ class Figure:
 def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Optional[Figure] = None,
         colour: Optional[str] = None,
         line_style: Optional[str] = None, label: Optional[str] = None) -> Tuple[Var, Var]:
-    # Данный метод считает два вида ошибок: вызываемый погрешностями и вызываемый статистикой.
-    # Если точки хорошо ложатся на прямую, то преобладать будет ошибка из-за погрешностей.
-    # Если точки измерены крайне точно, но на прямую они ложатся так себе, то преобладает статистическая ошибка.
-    # Рещультирующей ошибкой выдаётся корень из суммы квадратов двух видов этих ошибок
+    '''Данный метод считает два вида ошибок: вызываемый погрешностями и вызываемый статистикой.
+    Если точки хорошо ложатся на прямую, то преобладать будет ошибка из-за погрешностей.
+    Если точки измерены крайне точно, но на прямую они ложатся так себе, то преобладает статистическая ошибка.
+    Результирующей ошибкой выдаётся корень из суммы квадратов двух видов этих ошибок
+    '''
     # TODO: учитывать точки с весом обратным квадрату ошибки
-    if len(x) != len(y): raise TypeError('"x" and "y" must be the same length')
+    if len(x) != len(y): raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
     if len(x) == 0: raise ValueError('What should I do with no dots? Genius blyat!')
     if len(x) == 1: raise ValueError('One dot!?!? Are you serious, Sam?')
     if len(x) == 2: raise ValueError('There is no need in mnk if you have only 2 dots')
@@ -256,7 +257,8 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
 def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colour: Optional[str] = None,
                  line_style: Optional[str] = None, label: Optional[str] = None) -> Var:
     # todo: добавить статистическую ошибку
-    if len(x) != len(y): raise TypeError('"x" and "y" must be the same length')
+    if len(x) != len(y):
+        raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
     k: Var = reduce(lambda res, i: res + x[i] * y[i], range(len(x)), 0) / \
              reduce(lambda res, x_var: res + x_var * x_var, x[1:], x[0] * x[0])
     if figure is not None:
@@ -265,7 +267,16 @@ def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colo
 
 
 def _find_stat_errors(x: array, y: array, k, b):
+    '''
+    Считатет и выводит статистическую ошибку ТОЛЬКО ДЛЯ ЛИНЕЙНОЙ ФУНКЦИИ
+    :param x: Массив с значениями по оси X
+    :param y: Массив с значениями по оси Y
+    :param k: Коэффицент наклона прямой, которую мы нааппроксимировали ранее
+    :param b: Свободный коэффицент прямой
+    :return: Ошибку для k и b соотвественно
+    '''
+    if len(x) != len(y):
+        raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
     Sy = sum((y - b - k * x) ** 2) / (len(x) - 2)
     D = len(x) * sum(x ** 2) - (sum(x)) ** 2
-    # returns dk, db
     return sqrt(Sy * len(x) / D), sqrt(Sy * sum(x ** 2) / D)
