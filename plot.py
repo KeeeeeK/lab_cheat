@@ -129,22 +129,18 @@ class Figure:
                  legend_props: Optional[dict] = None,
                  for_multiple_graph: bool = False):
         """
-        :param graph_name: Название графика.
-        :param x_label: Подпись около оси X.
-        :param y_label: Подпись около оси Y.
-        :param name_on_main_field: Нужно ли в поле графика сделать надпись с его названием.
-        :param bold_axes: Нужны ли жирные оси X и Y.
-        :param zero_in_corner: Нужно ли чтобы точка (0, 0) отображалась на графике, и в ней пересекались оси X и Y
-        :param label_near_arrow: Если True: Названия будут отображаться в углу рядом с концами стрелок осей
-                                 Если False: Названия будут отображаться посередине осей.
-        :param my_func: функция, которая принимает объект класса matplotlib.axes._subplots.AxesSubplot как аргумент
-        Будет вызвана до нормировки осей и рисования линий. Может быть использована для использования любых
-        возможностей matplotlib.
-        :param x_label_coords: Координаты размещения названия оси X.
-        Легко двигать название (x_label) таким образом: figure.x_label_coords+=array([0.03, -0.04])
-        :param y_label_coords: То же самое, что и x_label_coords
-        :param legend_props: Словарь объектов того, что должно быть в легенде, нужен только для контроля легенды,
-        если не указан, в легенде будут все элементы.
+        :param x_label: label near x axis
+        :param y_label: label near y axis
+        :param bold_axes: need of y=0 and x=0 lines
+        :param zero_in_corner: need of showing (0, 0) wherever the other dots
+        :param label_near_arrow: if True: labels will be shown in the corners near arrows of axis.
+                                 if False: labels will be near centers of appropriate axis.
+        :param my_func: function that takes an object of the matplotlib.axes._subplots.AxesSubplot class as an argument.
+        It will be called before fixing axes and adding lines. You may use it to add anything you want.
+        :param x_label_coords: coordinates of placing x_label.
+        It's easy to shift x_label in this way: figure.x_label_coords+=array([0.03, -0.04])
+        :param y_label_coords: similar to x_label_coords
+        :param legend_props: dictionary for
         """
         self.graph_name = graph_name
         self.x_label, self.y_label = x_label, y_label
