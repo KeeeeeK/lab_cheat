@@ -338,12 +338,19 @@ class Figure:
 def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Optional[Figure] = None,
         colour: Optional[str] = None,
         line_style: Optional[str] = None, label: Optional[str] = None) -> Tuple[Var, Var]:
-    '''
+    """
     Данный метод считает два вида ошибок: вызываемый погрешностями и вызываемый статистикой.
     Если точки хорошо ложатся на прямую, то преобладать будет ошибка из-за погрешностей.
     Если точки измерены крайне точно, но на прямую они ложатся так себе, то преобладает статистическая ошибка.
     Результирующей ошибкой выдаётся корень из суммы квадратов двух видов этих ошибок
-    '''
+    :param x: Итерируемый объект с абсциссами точек
+    :param y: Итерируемый объект с ординатами точек
+    :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена
+    :param colour: Цвет прямой
+    :param line_style: Стиль линии
+    :param label: Название прямой для легенды
+    :return:
+    """
     # TODO: учитывать точки с весом обратным квадрату ошибки
     if len(x) != len(y): raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
     if len(x) == 0: raise ValueError('What should I do with no dots? Genius blyat!')
@@ -369,8 +376,17 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
 
 def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colour: Optional[str] = None,
                  line_style: Optional[str] = None, label: Optional[str] = None) -> Var:
-    # todo: Что это вообще за метод сука
-    # todo: добавить статистическую ошибку
+    """
+    Тот же самый мнк, но проводит линию через начало координат
+    :param x: Итерируемый объект с абсциссами точек
+    :param y: Итерируемый объект с ординатами точек
+    :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена
+    :param colour: Цвет прямой
+    :param line_style: Стиль линии
+    :param label: Название прямой для легенды
+    :return: Коэффицент наклона полученной прямой
+    """
+    # TODO: добавить статистическую ошибку
     if len(x) != len(y):
         raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
     k: Var = reduce(lambda res, i: res + x[i] * y[i], range(len(x)), 0) / \
