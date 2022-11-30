@@ -4,10 +4,26 @@ from .var import Var, GroupVar
 import sympy as sp
 import numpy as np
 
+"""
+Данный файл отвечает за переопределение базовых операций для выполнения их с бъектами класса var
+и перерассчёта погрешностей косвенных измерений
+Входящие функции:
+'sqrt', 'sin', 'cos', 'tg', 'ctg', 'arctg', 'arcctg', 'arcsin', 'arccos', 'sh', 'ch', 'th', 'cth', 'arcth', 'arcsh', 
+'exp', 'ln', 'mean'
+"""
+
 
 def _mono_function(x, name_func_for_sympy: str, name_func_for_numpy: str = None,
                    real_name: str = None):
-    """This function helps to make functions of one variable"""
+    """
+    Эта функция позволяет создать функцию от одной переменной.
+    Позволяет без головной боли запускать функции от разных типов данных не вызывая проблем
+    :param x: Аргумент данной функции
+    :param name_func_for_sympy: Название функции для sympy
+    :param name_func_for_numpy: Название функции для numpy
+    :param real_name: Имя функции, удобное для пользователя, должно быть перечислено в списке выше
+    :return: Результат выполнения данной функции
+    """
     if name_func_for_numpy is None:
         name_func_for_numpy = name_func_for_sympy
     if real_name is None:
@@ -113,7 +129,10 @@ _all_funcs = {'sqrt': sqrt, 'sin': sin, 'cos': cos, 'tg': tg, 'ctg': ctg, 'arctg
               'arcsin': arcsin, 'arccos': arccos, 'sh': sh, 'ch': ch, 'th': th, 'cth': cth, 'arcth': arcth,
               'arcsh': arcch, 'exp': exp, 'ln': ln, 'mean': mean}
 
+
 def step(x: GroupVar):
-    """Gives just a difference between variables (xt[i]-xt[i-1]).
-    Sometimes it's better to use 'mnk'"""
+    """
+    Возвращает просто разницу между переменными(x[i]-x[i-1]).
+    Иногда это лучше чем использовать МНК
+    """
     return GroupVar(tuple(x[i]-x[i-1] for i in range(1, len(x))))
