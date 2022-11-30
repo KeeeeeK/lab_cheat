@@ -63,7 +63,7 @@ class Figure:
         :param b: Свободный член прямой
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
         'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-        :param line_style: Стиль прямой
+        :param line_style: Стиль прямой 'solid', 'dotted', 'dashed', 'dashdot'
         :param label: Название прямой для легенды
         :return: Себя же, для однострочной записи
         """
@@ -95,7 +95,7 @@ class Figure:
         :param y: Ордината прямой
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
         'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-        :param line_style: Стиль прямой
+        :param line_style: Стиль прямой 'solid', 'dotted', 'dashed', 'dashdot'
         :param label: Название прямой для создания легенды
         :return: Себя же, для однострочной записи
         """
@@ -112,7 +112,7 @@ class Figure:
         :param x_min: Наименьшее значение по оси X
         :param x_max: Наибольшее значение по оси X
         :param N: Количество точек в данном промежутке
-        :param line_style: Стиль линии
+        :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
         'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
         :param label: Название данной кривой для создания легенды
@@ -357,7 +357,7 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
     :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена
     :param colour: цвет прямой 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
     'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-    :param line_style: Стиль линии
+    :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'
     :param label: Название прямой для легенды
     :return: Коэффицент наклона аппроксимированной прямой и её свободный коэффицент
     """
@@ -393,7 +393,7 @@ def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colo
     :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена
     :param colour: цвет прямой 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
     'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-    :param line_style: Стиль линии
+    :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'
     :param label: Название прямой для легенды
     :return: Коэффицент наклона полученной прямой
     """
