@@ -15,17 +15,19 @@ from .var import set_value_accuracy, set_error_accuracy, set_big_number, normali
 
 _rare_used_funcs = [set_value_accuracy, set_error_accuracy, set_big_number, rus_tex_formula, normalize]
 
-
+"""
+Данный файл содержит в себе особые функции, расширяющие возможности библиотеки.
+"""
 def slicer(var: GroupVar, left_val: Optional[SupportsFloat] = None,
            right_val: Optional[SupportsFloat] = None,
            excluding: Optional[List[SupportsFloat]] = None) -> Union[List[int]]:
     """
-    Makes list of indexes of variables which value is between given borders except the nearest vars to numbers in
-    exluding list
-    :param var: GroupVar that contains variables
-    :param left_val: left border. If None then -infinity.
-    :param right_val: right border. If None then +infinity.
-    :param excluding: If None then []
+    Создаёт список индексов переменных, лежащих в заданном промежутке,
+    исключая точки, наиблизжайшие к значениям из чёрного списка
+    :param var: GroupVar с переменными
+    :param left_val: Левая граница, если None, то -бесконечность
+    :param right_val: Левая граница, если None, то -бесконечность
+    :param excluding: Если None, то []
     Ex:
     >>> v = GroupVar(range(10), 0)
     >>> s = slicer(v, left_val=1.1, right_val=8, excluding=[3.1, 6.3, 0])
@@ -75,6 +77,12 @@ def slicer(var: GroupVar, left_val: Optional[SupportsFloat] = None,
 
 
 def prototype(XL: str, zero_in_corner=True) -> None:
+    """
+    Функция для быстрого построения графика из Excel
+    :param XL: путь к файлу Excel
+    :param zero_in_corner: Нужно ли совместить начало координат с точкой (0, 0)
+    :return: ничего
+    """
     x_val, y_val = to_table(XL)
     x, y = GroupVar(x_val, 0), GroupVar(y_val, 0)
     Figure(zero_in_corner=zero_in_corner).plot(x, y).show()
@@ -83,9 +91,10 @@ def prototype(XL: str, zero_in_corner=True) -> None:
 def sorting(x: Union[array, List, GroupVar], y: Union[array, List, GroupVar]) -> Tuple[
     Union[array, List, GroupVar], Union[array, List, GroupVar]]:
     """
-    !!! x and y must be the same type !!!
-    Sorts pairs of data to make xt raising
-    :return: the same types as x and y.
+    Сортирует точки по значениям по оси X, возвращает отсортированные списки с координатами
+    :param x: Итерируемый объект с абсциссами точек
+    :param y: Итерируемый объект с абсциссами точек
+    :return: кортеж с 2умя элементами: итерируемые объекты с координатами по X и по Y
     """
     if isinstance(x, list) and isinstance(y, list):
         indexes = _argsort(array(x))
@@ -104,6 +113,13 @@ def sorting(x: Union[array, List, GroupVar], y: Union[array, List, GroupVar]) ->
 
 
 def smoothing(x: Union[array, List, GroupVar], y: Union[array, List, GroupVar], smooth_factor) -> Callable:
+    """
+    Строит сглаженную функцию через данные точки, возвращает её
+    :param x: Итерируемый объект с абсциссами точек
+    :param y: Итерируемый объект с ординатами точек
+    :param smooth_factor:
+    :return: Сглаженная функция через заданные точки
+    """
     # todo: сделать покопаться в _UnivariateSpline и учитывать каждую точку с весом ошибки
     x, y = sorting(x, y)
     if isinstance(x, GroupVar):
@@ -121,11 +137,11 @@ def smoothing(x: Union[array, List, GroupVar], y: Union[array, List, GroupVar], 
 def fmin(f: Callable, x0: Union[Var, SupportsFloat], x: Optional[GroupVar] = None, y: Optional[GroupVar] = None) \
         -> Union[Var, SupportsFloat]:
     """
-    fmin is for very accurate search of minimum of known graph
-    :param f: function to minimize
-    :param x0: dot near minimum
-    :params x and y to find the error accurately
-    :return: x_min
+    Функция для очень аккуратного поиска минимума функции
+    :param f: Функция для поиска минимума
+    :param x0: Точка рядом с минимумом
+    :params x and y: чтобы аккуратнее посчитать ошибку определения минимума
+    :return: Абсциссу точки минимума
     """
     # TODO: сделать так, чтоб искало минимум на заднанном промежутке. (Потому что, при данной реализации минимум
     #  функции-колокола будет ниже, чем любая переданная точка. Что не есть хорошо)
@@ -150,11 +166,27 @@ def fmin(f: Callable, x0: Union[Var, SupportsFloat], x: Optional[GroupVar] = Non
 
 def fmax(f: Callable, x0: Union[Var, SupportsFloat], x: Optional[GroupVar] = None, y: Optional[GroupVar] = None) \
         -> Union[Var, SupportsFloat]:
+    """
+    Функция для очень аккуратного поиска максимума функции, работает на основе fmin
+    :param f: Функция для поиска минимума
+    :param x0: Точка рядом с минимумом
+    :params x and y: чтобы аккуратнее посчитать ошибку определения минимума
+    :return: Абсциссу точки максимума
+    """
     return fmin(lambda t: -f(t), x0, x=x, y=y)
 
 
 def curve_fit(f: Callable, x: GroupVar, y: GroupVar, p0: Optional[Sequence[SupportsFloat]] = None):
-    """unfortunately, ignores x.err()"""
+    """
+    Функция, аппроксимирующая любую прямую к данным точкам
+    :param f: Функция от x, должна принимать кроме x ещё другие параметры для аппроксимации
+    :param x: Итерируемый объект с координатами точек по оси абсцисс
+    :param y: Итерируемый объект с координатами точек по оси ординат
+    :param p0: Итерируемый объект с начальными значениями аппроксимируемых параметров
+    (Их количество на 1 меньше, чем значений, принимаемых функцией f).
+    Указание данного параметра сильно ускорит аппроксимацию функции
+    :return:
+    """
     initial_p = None if p0 is None else np.array(p0)
     too_small_err = np.any(np.asarray(y.err()) < 1/np.finfo(np.float_).max)
     sigma = None if too_small_err else y.err()
@@ -163,6 +195,11 @@ def curve_fit(f: Callable, x: GroupVar, y: GroupVar, p0: Optional[Sequence[Suppo
 
 
 def sigma(variable: Union[GroupVar, Sequence]):
+    """
+    Считает отклонение точек массива
+    :param variable: Итерируемый объект с точками
+    :return: Дисперсию данных точек
+    """
     if isinstance(variable, GroupVar):
         variable = variable.val()
     return sqrt(_var(variable))
