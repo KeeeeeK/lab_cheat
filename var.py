@@ -15,27 +15,32 @@ DictSymVar: Dict[Symbol, Var] = {}
 @total_ordering
 class Var:
     """
-    Class Var is one of the main classes in lab_cheat.
-    It is used to store the pair of value and error of any directly measured variable OR
-    the function of how to calculate indirect variable from direct variables.
-    There is no public slots in this class.
-    For series of similar variables it's more convenient to use GroupVar.
+    Класс Var один из самых главных классов в библиотеке lab_cheat.
+    Он используется, чтобы хранить пару "значение ошибка" любой,
+    непосредственно измеряемой переменной ИЛИ функцию, как вычислить
+    косвенную переменную из прямых переменных. В этом классе нет
+    публичных слотов.
+    Для серий однотипных переменных удобнее использовать GroupVar.
     """
 
     @overload
     def __init__(self, _story: Expr, exp: int = 0):
-        """Never use Var(...) in this way. This is used only by library"""
+        """
+        Никогда не используйте Var(...) следующим образом.
+        Это используется только библиотекой.
+        """
         ...
 
     @overload
     def __init__(self, value: SupportsFloat, error: SupportsFloat, exp: int = 0):
         """
-        Generates object of Var class.
-        :param value: the approximate value of directly measured variable
-        :param error: it's standard deviation
-        :param exp: if exp!=0 then value and error will be changed:
-            value -> value * 10 ** exp
-            error -> error * 10 ** exp
+        Создаёт объект класса Var.
+        :param value: приближенное значение непосредственно измеряемой величины
+        :param error: стандартное отклонение
+        :param exp: если exp!=0, тогда величина и ошибка будут изменены
+        следующим образом:
+            величина -> величина * 10 ** exp
+            ошибка -> ошибка * 10 ** exp
         """
         ...
 
@@ -50,8 +55,8 @@ class Var:
 
     def val_err(self) -> Tuple[float, float]:
         """
-        :return: tuple containing value and error
-        (This method is more efficient than calling val() and err() separately.)
+        :return: кортеж, содержащий перменную и значение
+        (Этот метод метод более эффективен, чем вызов val() и err() по отдельности.)
         """
         args = tuple(self._story.free_symbols)
         func = lambdify(args, self._story, modules='numpy')
@@ -61,53 +66,53 @@ class Var:
         val = func(*values)
         if isnan(val):
             raise TypeError('The argument does not belong to the definition scope')
-        # we check that values of function on both sides exist
+        # проверяем, что значения функции с обеих сторон существуют
         err = sqrt(sum((estimated_error(func, values, diag_err[i], val)) ** 2 for i in range(len(values))))
         return val, err
 
     def val(self) -> float:
         """
-        :return: value of your variable
+        :return: значение вашей переменной
         """
         args = tuple(self._story.free_symbols)
         return lambdify(args, self._story, 'numpy')(*(DictSymVar[sym]._value for sym in args))
 
     def err(self) -> float:
         """
-        :return: error of your variable
-        The following is to explain how does library finds it:
-            In most cases we have random independent errors of variables:
-
+        :return: ошибки ваших переменных
+        Ниже объясняется, как библиотека находит его:
+            В большинстве случаев мы имеем случайные назависимые ошибки переменных:
             delta(f(x1, x2, ...)) ~= sqrt( (df/dx1 * delta(x1))**2 + (df/dx2 * delta(x2))**2 + ... ),
 
-            where the error by x1 for example in this method is calculated by:
+            Где ошибки x1, например, в этом методе вычисляются следующим образом:
 
             df/dx1 * delta(x1) = (f(x1+dx1, x2, ...) - f(x1 - dx1, x2, ...)) * BIG_NUMBER / 2
             dx1 = delta(x1) / BIG_NUMBER
 
-            As you see, it's very similar to finding  partial derivative numerically.
-            You may change BIG_NUMBER in function 'set_big_number' in this module. (default is 50)
+            Как вы можете заметить, это похоже на нахождение частной производной.
+            Вы можете изменить BIG_NUMBER внутри функции 'set_big_number' в этом модуле. (по стандарту 50)
+
         """
         return self.val_err()[1]
 
     def __repr__(self) -> str:
         """
-        :return: short rough representation of variable
+        :return: краткое грубое представление переменной
         """
         return f'~{self.val()}'
 
     def __str__(self) -> str:
         """
-        :return: string looking like "value \\pm error", where value end error are rounded.
-        Digits that have the same order as the 40% error will not be shown.
-        If error is zero, there won't be shown digits having the same order as 5% value.
-        (40% and 5% may be changed in 'set_error_accuracy' and 'value_accuracy' respectively.)
+        :return: строка выглядит как-то так "value \\pm error", где значение и ошибка округляются.
+        Цифры одинакового поряка, от 40% ошибки не будут отображаться.
+        Если ошибка ноль, не отобразятся числа порядка больше, 5% от значения.
+        (40% и 5% могут быть изменены в 'set_error_accuracy' и 'value_accuracy' соответственно.)
         """
         return normalize(self)
 
     def __le__(self, other: Union[SupportsFloat, Var]) -> bool:
         """
-        As other order operations compares self.value with other.value or number
+        Подобно другим операциям порядка, сравнивает self.values с other.value или числом.
         """
         if isinstance(other, Var):
             return self.val() <= other.val()
@@ -116,7 +121,7 @@ class Var:
 
     def __eq__(self, other: Union[SupportsFloat, Var]) -> bool:
         """
-        As other order operations compares self.value with other.value or number
+        Подобно другим операциям порядка, сравнивает self.values с other.value или числом.
         """
         if isinstance(other, Var):
             return self.val() == other.val()
@@ -167,39 +172,38 @@ class Var:
 
 class GroupVar:
     """
-    This class implements the idea of a series of similar measurements. The behavior is the same as in numpy arrays.
-    So, adding, multiplying of two GroupVar is corresponding operation between Vars inside GroupVars.
-    The only slot in this class is 'variables'. It's a list containing Vars.
-    (To read documentation to this class, it's necessary to understand the same methods in Var class.)
+    Этот класс реализует идею серии подобных измерений. Ведёт себя аналогично массиву numpy.
+    Итак, сложение, умножение двух GroupVar это соответствующая операция между Vars внутри GroupVars.
+    Единственный слот в этом классе - это 'переменная'. Это список, содержащий Vars.
+    (Чтобы читать документацию к классу, необходимо понимать соответствующие методы в классе Var.)
     """
 
     @overload
     def __init__(self, variables: Sequence[Var], exp=0):
         """
-        Generates GroupVar where 'variables' will be in 'self.variables'
-        :param variables: something containing Vars
-        :param exp: if exp!=0 then all variables will be changed:
-            var -> var * 10 ** exp
+        Создаёт пару класса "Var(значение, ошибка)" и передаёт её в 'self.variables'
+        :param variables: что-то, содержащее Vars
+        :param exp: если exp!=0, тогда все переменные будут изменены следующим образом:
+	        переменная -> переменная * 10 ** exp
         """
         ...
 
     @overload
     def __init__(self, values: Sequence[SupportsFloat], errors: Sequence[SupportsFloat], exp=0):
         """
-        Generates lots of 'Var(value, error)' and puts them to 'self.variables'
-        :param values: something containing numbers
-        :param errors: something containing numbers
-        :param exp: exp: if exp!=0 then all variables will be changed:
-            var -> var * 10 ** exp
+        Создаёт пару класса "Var(значение, ошибка)" и передаёт её в 'self.variables'
+        :param values: что-то, содержащее числа
+        :param errors: что-то, содержащее числа
+        :param exp: если exp!=0, тогда все переменные будут изменены следующим образом:
+	        переменная -> переменная * 10 ** exp
         """
         ...
 
     @overload
     def __init__(self, values: Sequence[SupportsFloat], error: SupportsFloat, exp=0):
         """
-        Very similar as the previous overloaded __init__ method, but all errors in variables will be the same.
-        The same as calling
-        GroupVar(values, [error]*len(values), exp)
+        Схоже с предыдущим перегруженным методом __init__, но все ошибки внутри переменных будут теми же.
+        Аналогично вызову GroupVar(значение, [ошибка]*len(значение), exp)
         """
         ...
 
@@ -216,27 +220,28 @@ class GroupVar:
 
     def val_err(self) -> Tuple[Tuple[float, ...], Tuple[float, ...]]:
         """
-        :return: Tuple consisting of (tuple of values) and (tuple of errors)
+        :return: Кортеж, состоящий из (кортежа значений) и (кортежа переменных).
         """
         return tuple(zip(*(var.val_err() for var in self)))
 
     def val(self) -> List[float]:
         """
-        :return: list of values
+        :return: список значений
         """
         return [var.val() for var in self.variables]
 
     def err(self) -> List[float]:
         """
-        :return: list of errors
+        :return: список ошибок
         """
         return [var.err() for var in self.variables]
 
     def __getitem__(self, item: Union[int, slice, Iterable[int]]):
         """
-        If type of item is 'int', then returns self.variables[item].
-        If type of item is 'slice', then returns GroupVar(self.variables[item])
-        If type of item is 'List[int]', then returns GroupVar([self.variables[i] for i in item])
+        Если тип элемента 'целое число', тогда возвращает self.variables[элемент].
+        Если тип элемента 'срез', тогда возвращает GroupVar(self.variables[элемент]).
+        Если тип элемента 'список[целые числа]', тогда возвращает GroupVar([self.variables[i] for i in элемент]).
+
         """
         if isinstance(item, slice):
             return GroupVar(self.variables[item])
@@ -305,26 +310,26 @@ value_accuracy: float = 0.05
 
 
 def set_error_accuracy(accuracy: float):
-    """Look in Var.__str__ documentation"""
+    """Смотреть документацию Var.__str__"""
     global error_accuracy
     error_accuracy = accuracy
 
 
 def set_value_accuracy(accuracy: float):
-    """Look in Var.__str__ documentation"""
+    """Смотреть документацию Var.__str__"""
     global value_accuracy
     value_accuracy = accuracy
 
 
 def suitable_accuracy(val: float, err: float) -> int:
-    """Finds needed number of digits as it was shown Var.__str__ documentation"""
+    """Находит необходимое число цифр, которое было показано в документации Var.__str__"""
     if err == 0:
         return Decimal.from_float(val * value_accuracy).adjusted()
     return Decimal.from_float(err * error_accuracy).adjusted()
 
 
 def normalize(var: Var, accuracy: Optional[int] = None) -> str:
-    """The same as str(var), but you can set the number of shown digits in parameter 'accuracy'"""
+    """То же самое, что str(var), но Вы можете установить число цифр, которое будет показано, в параметре 'accuracy'"""
     val, err = var.val_err()
     if accuracy is None:
         accuracy = suitable_accuracy(val, err)
@@ -336,14 +341,14 @@ BIG_NUMBER = 50
 
 
 def set_big_number(n: int):
-    """look in Var.err documentation"""
+    """Смотреть документацию Var.err"""
     global BIG_NUMBER
     BIG_NUMBER = n
 
 
 def estimated_error(func: Callable[[...], float], values: array, err_vector: array, val: float):
     err_vector /= BIG_NUMBER
-    # we catch warnings turning them to errors
+    # ловим предупреждения превращая их в ошибки
     with catch_warnings():
         simplefilter("error")
         try:
