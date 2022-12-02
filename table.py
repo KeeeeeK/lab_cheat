@@ -77,11 +77,7 @@ class TexTable:
                              self._write_numbers(numerate, colours, color_frequency) + self._end())
 
     def _numerating(self):
-        """
-        Нумерует строки
-        :return: ничего
-        """
-        self._titles = [''] + self._titles
+        self._titles = [' '] + self._titles
         max_num = max(map(len, self._numbers))
         self._numbers = [tuple(str(i) for i in range(1, max_num + 1))] + self._numbers
 

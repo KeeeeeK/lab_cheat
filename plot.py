@@ -129,13 +129,13 @@ class Figure:
                  legend_props: Optional[dict] = None,
                  for_multiple_graph: bool = False):
         """
-        :param x_label: label near x axis
-        :param y_label: label near y axis
+        :param x_label: label near x-axis
+        :param y_label: label near y-axis
         :param bold_axes: need of y=0 and x=0 lines
         :param zero_in_corner: need of showing (0, 0) wherever the other dots
         :param label_near_arrow: if True: labels will be shown in the corners near arrows of axis.
                                  if False: labels will be near centers of appropriate axis.
-        :param my_func: function that takes an object of the matplotlib.axes._subplots.AxesSubplot class as an argument.
+        :param my_func: function that takes plt.gca() as an argument and makes anything with current graph.
         It will be called before fixing axes and adding lines. You may use it to add anything you want.
         :param x_label_coords: coordinates of placing x_label.
         It's easy to shift x_label in this way: figure.x_label_coords+=array([0.03, -0.04])
