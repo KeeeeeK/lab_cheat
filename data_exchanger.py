@@ -119,15 +119,3 @@ def quick_use_form(dictionary):
             dictionary[key_up] = dictionary[key]
     return dictionary
 
-df = read_data()
-print(df)
-c, tables = shredder(df, True)
-print(c)
-for i in tables:
-    print(i)
-    print('<<>>')
-dv = get_into_groupvar_col_named(tables[1])
-print(dv)
-dv = quick_use_form(dv)
-print(dv['u, м/с2'])
-print(dv['u'])
