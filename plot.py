@@ -224,8 +224,8 @@ class Figure:
         x_min, x_max = axes.get_xlim()
         y_min, y_max = axes.get_ylim()
         if self.zero_in_corner is True:
-            x_min = min(0, x_min)
-            y_min = min(0, y_min)
+            x_min = 0
+            y_min = 0
         axes.set_xlim(x_min, x_max)
         axes.set_ylim(y_min, y_max)
         return x_min, x_max, y_min, y_max
