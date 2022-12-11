@@ -420,5 +420,3 @@ def _find_stat_errors(x: array, y: array, k, b):
     Sy = sum((y - b - k * x) ** 2) / (len(x) - 2)
     D = len(x) * sum(x ** 2) - (sum(x)) ** 2
     return sqrt(Sy * len(x) / D), sqrt(Sy * sum(x ** 2) / D)
-
-#TODO: Написать метод, который посчитает статистическую ошибку для mnk_through0, вроде можно пользоваться и _find_stat_errors, но я не до конца уверен, что он подойдёт, ибо точка 0, 0 не должна иметь ошибки вообще
