@@ -2,8 +2,9 @@ from .var import Var, GroupVar
 import pandas as pd
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showerror
-from numpy import isnan, nan
+from numpy import isnan, nan, array
 from copy import deepcopy
+import matplotlib.pyplot as plt
 
 
 def read_data():
@@ -25,11 +26,12 @@ def read_data():
     return None
 
 
-def shredder(dataf: pd.DataFrame, constants_needed=False):
+def shredder(dataf: pd.DataFrame, constants_needed=False, show_result=False):
     """
     Забирает константы из таблицы DataFrame и режет её на маленькие таблички по столбцам pd.na
     :param dataf: Правильно отформатированная таблица.
     :param constants_needed: Есть ли в ней константы, которые нужно употребить.
+    :param show_result: Нужно ли вывести, на какие таблички был поделен документ.
     :return: словарь с константами в формате Var и список с каждой табличкой отдельно.
     """
     # FIXME: Починить с изменением read_data(), теперь первая строка не названия столбцов
@@ -72,13 +74,14 @@ def shredder(dataf: pd.DataFrame, constants_needed=False):
     return const, datat
 
 
-def shredder_upd(dataf: pd.DataFrame):
+def shredder_upd(dataf: pd.DataFrame, show_result=False):
     """
     Улучшенная версия shredder, сама ищет таблицы в DataFrame, дробит по таблицам максимальных размеров.
     Для корректного ввода данных необходимо, чтобы все значения в таблицах были числового формата, а названия столбцов
     тестового.
     :param dataf: DataFrame, с данными вашей лабы, который нужно разделить на таблички
     (Обычно используется результат работы функции read_data).
+    :param show_result: Нужно ли вывести, на какие таблички был поделен документ.
     :return: Возвращает dict с константами, ключи - названия констант, значения - объекты класса Var,
     т. е. числа + погрешности.
     """
@@ -99,9 +102,17 @@ def shredder_upd(dataf: pd.DataFrame):
                     for i in range(table.shape[0]):
                         constants[table.iloc[i, 0]] = Var(table.iloc[i, 1], table.iloc[i, 2])
                 else:
-                    table.rename(columns=table.iloc[0]).drop(table.index[0])
-                    tables.append(table)
+                    name = []
+                    for i in table.iloc[0]:
+                        name.append(i)
+                    table.columns = name
+                    tables.append(table.iloc[1:])
                 dataf = _table_del([m, n], cord_n, dataf)
+    if show_result:
+        if len(constants.keys()) != 0:
+            print(constants)
+        for i in tables:
+            show_df(i)
     return constants, tables
 
 
@@ -209,8 +220,8 @@ def _table_check(cord_v, data: pd.DataFrame):
     """
     Внутренняя функция, отвечающая за определение размеров таблицы по её верхнему левому углу. Для неё очень важно,
     чтобы названия столбцов были str, а значения непустыми ячейками с числами.
-    :param cord_v: Координаты верхенего левого угла рассматриваемой таблички
-    :param data: DataFrame, из которого нужно выделить таблицу
+    :param cord_v: Координаты верхнего левого угла рассматриваемой таблички.
+    :param data: DataFrame, из которого нужно выделить таблицу.
     """
     cord_n = deepcopy(cord_v)
     if type(data.iloc[cord_v[0] + 1, cord_v[1]]) == str or isnan(data.iloc[cord_v[0] + 1, cord_v[1]]):
@@ -289,3 +300,35 @@ def _table_del(cord_v, cord_n, data):
     """
     data.iloc[cord_v[0]:cord_n[0] + 1, cord_v[1]:cord_n[1] + 1] = nan
     return data
+
+
+def show_df(df):
+    """
+    Отвечает за красивый вывод таблиц в браузер, используется для отладки работы программы.
+    :param df: DataFrame, который нужно вывести
+    """
+    col_width = 2.0
+    row_height = 0.625
+    font_size = 14
+    header_color = '#757575'
+    row_colors = ['#f1f1f2', 'w']
+    edge_color = 'w'
+    bbox = [0, 0, 1, 1]
+    header_columns = 0
+    ax = None
+    if ax is None:
+        size = (array(df.shape[::-1]) + array([0, 1])) * array([col_width, row_height])
+        fig, ax = plt.subplots(figsize=size)
+        ax.axis('off')
+    mpl_table = ax.table(cellText=df.values, bbox=bbox, colLabels=df.columns)
+    mpl_table.auto_set_font_size(False)
+    mpl_table.set_fontsize(font_size)
+    for k, cell in mpl_table._cells.items():
+        cell.set_edgecolor(edge_color)
+        if k[0] == 0 or k[1] < header_columns:
+            cell.set_text_props(weight='bold', color='w')
+            cell.set_facecolor(header_color)
+        else:
+            cell.set_facecolor(row_colors[k[0] % len(row_colors)])
+    plt.show()
+
