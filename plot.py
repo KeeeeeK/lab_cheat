@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import reduce
+from tkinter.messagebox import showwarning
 from typing import Optional, Tuple, Union, Callable, SupportsFloat, Sequence
 
 import matplotlib.patches as _mp
@@ -18,8 +19,8 @@ class Figure:
 
     def __init__(self, x_label: str = '', y_label: str = '', bold_axes: bool = True, zero_in_corner: bool = True,
                  label_near_arrow: bool = True, my_func: Optional[Callable] = None,
-                 x_label_coords: Sequence[SupportsFloat] = array([1.03, -0.03]),
-                 y_label_coords: Sequence[SupportsFloat] = array([-0.06, 1]),
+                 x_label_coords: Sequence[SupportsFloat] = None,
+                 y_label_coords: Sequence[SupportsFloat] = None,
                  legend_props: Optional[dict] = None):
         """
         :param x_label: Подпись около оси X
@@ -38,7 +39,12 @@ class Figure:
         если не указан, в легенде будут все элементы
         """
         self.x_label, self.y_label = x_label, y_label
-        self.x_label_coords, self.y_label_coords = x_label_coords, y_label_coords
+        if x_label != '' and x_label.count(',') == 0:
+            showwarning("Странное название оси X", "В названии оси X не обнаружена размерность, "
+                                                   "вряд ли график с такими подписями осей кому-то нужен")
+        if y_label != '' and y_label.count(',') == 0:
+            showwarning("Странное название оси Y", "В названии оси Y не обнаружена размерность, "
+                                                   "вряд ли график с такими подписями осей кому-то нужен")
         self.bold_axes = bold_axes
         self.zero_in_corner = zero_in_corner
         self.label_near_arrow = label_near_arrow
@@ -54,6 +60,37 @@ class Figure:
         self._h_lines_params = []
         self._func_graphs_before_fixing_axes = []
         self._func_graphs_after_fixing_axes = []
+
+        # Выбираем место расположения названий осей
+        t_x, t_y = False, False
+        if x_label_coords is None:
+            if len(x_label) <= 6:
+                self.x_label_coords = [1.01 + 0.01 * len(x_label) * 0.8, 0.05]
+            else:
+                self.x_label_coords = [1.01, - 0.08]
+                t_x = True
+        else:
+            self.x_label_coords = x_label_coords
+        if y_label_coords is None:
+            if len(y_label) <= 7:
+                self.y_label_coords = [-0.02 - 0.01 * (len(y_label) * 0.7), 1.03]
+            else:
+                self.y_label_coords = [0, 1.05]
+                t_y = True
+        else:
+            self.y_label_coords = y_label_coords
+        if t_x and t_y:
+            showwarning("Названия обеих осей слишком длинное",
+                        "Так как названия обеих осей очень длинное, оно не помещается в обычное место, поэтому "
+                        "рекомендуется установить параметру label_near_axes значение False")
+        elif t_x:
+            showwarning("Название оси X слишком длинное",
+                        "Так как название оси X очень длинное, оно не помещается в обычное место для него, поэтому "
+                        "рекомендуется установить параметру label_near_axes значение False")
+        elif t_y:
+            showwarning("Название оси Y слишком длинное",
+                        "Так как название оси Y очень длинное, оно не помещается в обычное место для него, поэтому "
+                        "рекомендуется установить параметру label_near_axes значение False")
 
     def line(self, k: Union[float, int, Var], b: Union[float, int, Var], colour: Optional[str] = None,
              line_style: Optional[str] = None, label: Optional[str] = None) -> Figure:
@@ -195,6 +232,10 @@ class Figure:
         axes.grid(axis='both', which='major', linestyle='--', linewidth=1)
         axes.grid(axis='both', which='minor', linestyle='--', linewidth=0.5)
         axes.minorticks_on()
+
+    def _x_coords(self):
+        if len(self.x_label) <= 5:
+            pass
 
     def _show_plots(self, axes):
         """
@@ -359,9 +400,8 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
     'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
     :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'
     :param label: Название прямой для легенды
-    :return: Коэффицент наклона аппроксимированной прямой и её свободный коэффицент
+    :return: Коэффициент наклона аппроксимированной прямой и её свободный коэффицент
     """
-    # TODO: учитывать точки с весом обратным квадрату ошибки
     if len(x) != len(y): raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
     if len(x) == 0: raise ValueError('What should I do with no dots? Genius blyat!')
     if len(x) == 1: raise ValueError('One dot!?!? Are you serious, Sam?')
