@@ -18,6 +18,8 @@ _rare_used_funcs = [set_value_accuracy, set_error_accuracy, set_big_number, rus_
 """
 Данный файл содержит в себе особые функции, расширяющие возможности библиотеки.
 """
+
+
 def slicer(var: GroupVar, left_val: Optional[SupportsFloat] = None,
            right_val: Optional[SupportsFloat] = None,
            excluding: Optional[List[SupportsFloat]] = None) -> Union[List[int]]:
@@ -46,46 +48,6 @@ def slicer(var: GroupVar, left_val: Optional[SupportsFloat] = None,
         if excluding is not None else set()
     return sorted(
         list(filter(lambda i: left_val <= vals[i] <= right_val and i not in excluding_elements, range(len(vals)))))
-
-
-# def parabola_coefficients(x1, x2, x3, y1, y2, y3):
-#     """
-#     Finds parabola coefficients drown through 3 dots.
-#     (x1, y1), (x2, y2), (x3, y3) - are these dots
-#     y_exp = ax^2+bx+colour
-#     :return: a, b, colour
-#     """
-#     a = (y3 - (x3 * (y2 - y1) + x2 * y1 - x1 * y2) / (x2 - x1)) / (x3 * (x3 - x1 - x2) + x1 * x2)
-#     b = (y2 - y1) / (x2 - x1) - a * (x1 + x2)
-#     c = (x2 * y1 - x1 * y2) / (x2 - x1) + a * x1 * x2
-#     return a, b, c
-#
-#
-# def parabola_func(a, b, c):
-#     return lambda x: a * x ** 2 + b * x + c
-#
-#
-# def draw_parabola(x_min, x_max, N, a, b, c):
-#     """needed in my_func in Figure
-#     N - number of dots, (a, b, colour) - parabola coefficients"""
-#
-#     def _draw_parabola(ax):
-#         x = _linspace(x_min, x_max, N)
-#         ax.scatter(x=x, y=a * x ** 2 + b * x + c, s=1)
-#
-#     return _draw_parabola
-
-
-def prototype(XL: str, zero_in_corner=True) -> None:
-    """
-    Функция для быстрого построения графика из Excel
-    :param XL: путь к файлу Excel
-    :param zero_in_corner: Нужно ли совместить начало координат с точкой (0, 0)
-    :return: ничего
-    """
-    x_val, y_val = to_table(XL)
-    x, y = GroupVar(x_val, 0), GroupVar(y_val, 0)
-    Figure(zero_in_corner=zero_in_corner).plot(x, y).show()
 
 
 def sorting(x: Union[array, List, GroupVar], y: Union[array, List, GroupVar]) -> Tuple[
