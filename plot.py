@@ -233,9 +233,6 @@ class Figure:
         axes.grid(axis='both', which='minor', linestyle='--', linewidth=0.5)
         axes.minorticks_on()
 
-    def _x_coords(self):
-        if len(self.x_label) <= 5:
-            pass
 
     def _show_plots(self, axes):
         """
