@@ -1,4 +1,4 @@
-<h1 align="center">VueSolitaire</h1>
+<h1 align="center">lab_cheat</h1>
 <h2 align="center"> Библиотека для упрощения работы с лабами </h2>
 
 # Что умеет?
