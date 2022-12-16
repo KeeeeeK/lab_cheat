@@ -95,14 +95,14 @@ class Figure:
     def line(self, k: Union[float, int, Var], b: Union[float, int, Var], colour: Optional[str] = None,
              line_style: Optional[str] = None, label: Optional[str] = None) -> Figure:
         """
-        Строит наклонную прямую с заданными коэффицентами вида y = kx + b
-        :param k: Коэффичент наклона прямой
-        :param b: Свободный член прямой
+        Строит наклонную прямую с заданными коэффициентами вида y = kx + b.
+        :param k: Коэффициент наклона прямой.
+        :param b: Свободный член прямой.
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
-        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-        :param line_style: Стиль прямой 'solid', 'dotted', 'dashed', 'dashdot'
-        :param label: Название прямой для легенды
-        :return: Себя же, для однострочной записи
+        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
+        :param line_style: Стиль прямой 'solid', 'dotted', 'dashed', 'dashdot'.
+        :param label: Название прямой для легенды.
+        :return: Себя же, для однострочной записи.
         """
         if isinstance(k, Var):
             k = k.val()
@@ -114,13 +114,13 @@ class Figure:
     def v_line(self, x: Union[float, int, Var], colour: Optional[str] = None, line_style: Optional[str] = None,
                label: Optional[str] = None) -> Figure:
         """
-        Строит вертикальную прямую через весь график
-        :param x: Абсцисса прямой
+        Строит вертикальную прямую через весь график.
+        :param x: Абсцисса прямой.
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
-        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-        :param line_style:Стиль прямой
-        :param label: Название прямой для создания легенды
-        :return: Себя же, для однострочной записи
+        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
+        :param line_style: Стиль прямой.
+        :param label: Название прямой для создания легенды.
+        :return: Себя же, для однострочной записи.
         """
         self._v_lines_params.append((x, colour, line_style, label))
         return self
@@ -128,43 +128,43 @@ class Figure:
     def h_line(self, y: Union[float, int, Var], colour: Optional[str] = None, line_style: Optional[str] = None,
                label: Optional[str] = None) -> Figure:
         """
-        Строит горизонтальную прямую через весь график
-        :param y: Ордината прямой
+        Строит горизонтальную прямую через весь график.
+        :param y: Ордината прямой.
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
-        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-        :param line_style: Стиль прямой 'solid', 'dotted', 'dashed', 'dashdot'
-        :param label: Название прямой для создания легенды
-        :return: Себя же, для однострочной записи
+        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
+        :param line_style: Стиль прямой 'solid', 'dotted', 'dashed', 'dashdot'.
+        :param label: Название прямой для создания легенды.
+        :return: Себя же, для однострочной записи.
         """
         self._h_lines_params.append((y, colour, line_style, label))
         return self
 
     def func_graph(self, func: Callable[[array], array], x_min: Union[int, float, Var], x_max: Union[int, float, Var],
-                   N: int = 1000, line_style: Optional[str] = None, colour: Optional[str] = None,
+                   n: int = 1000, line_style: Optional[str] = None, colour: Optional[str] = None,
                    label: Optional[str] = None, add_before_fixing_axes: bool = True) -> Figure:
         """
         todo: сделать возможность проводить линию до края графика по оси x влево или вправо, если указано None;
-        Отвечает за создание графика данной функции на экране
-        :param func: Принимает функцию, получающую массив, выводящую массив
-        :param x_min: Наименьшее значение по оси X
-        :param x_max: Наибольшее значение по оси X
-        :param N: Количество точек в данном промежутке
-        :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'
+        Отвечает за создание графика данной функции на экране.
+        :param func: Принимает функцию, получающую массив, выводящую массив.
+        :param x_min: Наименьшее значение по оси X.
+        :param x_max: Наибольшее значение по оси X.
+        :param n: Количество точек в данном промежутке.
+        :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'.
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
-        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-        :param label: Название данной кривой для создания легенды
-        :param add_before_fixing_axes: Нужно ли подогнать размеры по осям
+        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
+        :param label: Название данной кривой для создания легенды.
+        :param add_before_fixing_axes: Нужно ли подогнать размеры по осям.
         (True - без учёта данной кривой, False - с учётом)
         :return: Возвращает объект класса Figure, который представляет собой нарисованную кривую - график вашей функции
-        Вывод этого объекта необходим для возможности записи кода в виде obj.func_graph(arg...).func()
+        Вывод этого объекта необходим для возможности записи кода в виде obj.func_graph(arg...).func().
         """
         if isinstance(x_min, Var):
             x_min = x_min.val()
         if isinstance(x_max, Var):
             x_max = x_max.val()
-        x = linspace(x_min, x_max, N)
+        x = linspace(x_min, x_max, n)
         y = func(x)
-        needed_func_graph_list = self._func_graphs_after_fixing_axes if add_before_fixing_axes\
+        needed_func_graph_list = self._func_graphs_after_fixing_axes if add_before_fixing_axes \
             else self._func_graphs_before_fixing_axes
         needed_func_graph_list.append((x, y, line_style, colour, label))
         return self
@@ -172,18 +172,19 @@ class Figure:
     def plot(self, x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence],
              capsize=3, s=1, colour=None, marker=None, label=None) -> Figure:
         """
-
-        :param x: Итерируемый объект с абсциссами точке
-        :param y: Итерируемый объект с ординатами точек
-        :param capsize: Размер кончиков крестов погрешностей точек
-        :param s: Радиус точек
+        Отвечает за нанесение точек с погрешностями (крестов) на график.
+        :param x: Итерируемый объект с абсциссами точке.
+        :param y: Итерируемый объект с ординатами точек.
+        :param capsize: Размер кончиков крестов погрешностей точек.
+        :param s: Радиус точек.
         :param colour: цвет точек 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
-        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
+        'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
         :param marker: Тип маркера точек
-        Самые частоиспользуемые маркеры: '.', '+', 'x'
-        :param label: Название точек для легенды
-        :return: Себя, для записи в одну строку
+        Самые часто используемые маркеры: '.', '+', 'x'.
+        :param label: Название точек для легенды.
+        :return: Себя, для записи в одну строку.
         """
+
         def val_err(t):
             if isinstance(t, GroupVar):
                 return t.val_err()
@@ -201,8 +202,8 @@ class Figure:
 
     def show(self):
         """
-        Создаёт окно мат плот либа и рисует в нём всё, что было в объекте
-        :return: Ничего
+        Создаёт окно matplotlib и рисует в нём всё, что было в объекте.
+        :return: Ничего.
         """
         axes = plt.figure().add_subplot()
         self._grid_lines(axes)
@@ -225,20 +226,19 @@ class Figure:
     @staticmethod
     def _grid_lines(axes):
         """
-        Рисует сетку (второстепенные пунктирные линии)
+        Рисует сетку (второстепенные пунктирные линии).
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :return: Ничего
+        :return: Ничего.
         """
         axes.grid(axis='both', which='major', linestyle='--', linewidth=1)
         axes.grid(axis='both', which='minor', linestyle='--', linewidth=0.5)
         axes.minorticks_on()
 
-
     def _show_plots(self, axes):
         """
-        Наносит на точки и погрешности на график
+        Наносит на точки и погрешности на график.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :return: Ничего
+        :return: Ничего.
         """
         for scatter_kwargs, errorbar_kwargs in zip(self._scatters_kwargs, self._errorbars_kwargs):
             axes.scatter(**scatter_kwargs)
@@ -246,18 +246,18 @@ class Figure:
 
     def _show_func_graphs_before_fixing_axes(self, axes):
         """
-        Отвечает за отрисовку функции до подгона масштаба осей
+        Отвечает за отрисовку функции до подгона масштаба осей.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :return: Ничего
+        :return: Ничего.
         """
         for x, y, line_style, colour, label in self._func_graphs_before_fixing_axes:
             axes.plot(x, y, color=colour, linestyle=line_style, label=label)
 
     def _fix_axes(self, axes):
         """
-        Настраивает объект axes
+        Настраивает объект axes.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :return: Максимальные и минимальные значения по осям
+        :return: Максимальные и минимальные значения по осям.
         """
         x_min, x_max = axes.get_xlim()
         y_min, y_max = axes.get_ylim()
@@ -270,13 +270,13 @@ class Figure:
 
     def _v_lines(self, axes, x_min, x_max, y_min, y_max):
         """
-        Функция отвечающая за постоение вертикальных прямых
+        Функция отвечающая за построение вертикальных прямых.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
         :param x_min: -
         :param x_max: -
-        :param y_min: Координата начала прямой
-        :param y_max: Координата конца прямой
-        :return: Ничего
+        :param y_min: Координата начала прямой.
+        :param y_max: Координата конца прямой.
+        :return: Ничего.
         """
         for x, colour, line_style, label in self._v_lines_params:
             if isinstance(x, Var):
@@ -291,13 +291,13 @@ class Figure:
 
     def _h_lines(self, axes, x_min, x_max, y_min, y_max):
         """
-        Функция отвечающая за постоение вертикальных прямых
+        Функция отвечающая за построение вертикальных прямых.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :param x_min: Координата начала прямой
-        :param x_max: Координата конца прямой
+        :param x_min: Координата начала прямой.
+        :param x_max: Координата конца прямой.
         :param y_min: -
         :param y_max: -
-        :return: Ничего
+        :return: Ничего.
         """
         for y, colour, line_style, label in self._h_lines_params:
             if isinstance(y, Var):
@@ -312,9 +312,9 @@ class Figure:
 
     def _set_label(self, axes):
         """
-        Устанавливает названия осей по координатам
+        Устанавливает названия осей по координатам.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :return: Ничего
+        :return: Ничего.
         """
         for set_label, axis, label, label_coords in ((axes.set_xlabel, axes.xaxis, self.x_label, self.x_label_coords),
                                                      (axes.set_ylabel, axes.yaxis, self.y_label, self.y_label_coords)):
@@ -324,39 +324,41 @@ class Figure:
                 if self.label_near_arrow is True:
                     axis.set_label_coords(*label_coords)
 
-    def _arrows(self, axes):
+    @staticmethod
+    def _arrows(axes):
         """
-        Отвечает за правильное позиционирование и отрисовку стрелок на графике
+        Отвечает за правильное позиционирование и отрисовку стрелок на графике.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :return: Ничего
+        :return: Ничего.
         """
         arrowprops = dict(arrowstyle=_mp.ArrowStyle.CurveB(head_length=1), color='black')
         axes.annotate('', xy=(1.05, 0), xycoords='axes fraction', xytext=(-0.03, 0), arrowprops=arrowprops)
         axes.annotate('', xy=(0, 1.06), xycoords='axes fraction', xytext=(0, -0.03), arrowprops=arrowprops)
 
-    def _bold_axes(self, axes, x_min, x_max, y_min, y_max):
+    @staticmethod
+    def _bold_axes(axes, x_min, x_max, y_min, y_max):
         """
-        Отвечает за отрисовку жирных осей
+        Отвечает за отрисовку жирных осей.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :param x_min: Начало оси абсцисс
-        :param x_max: Конец оси абсцисс
-        :param y_min: Начало оси ординат
-        :param y_max: Конец оси ординат
-        :return: Ничего
+        :param x_min: Начало оси абсцисс.
+        :param x_max: Конец оси абсцисс.
+        :param y_min: Начало оси ординат.
+        :param y_max: Конец оси ординат.
+        :return: Ничего.
         """
         axes.hlines(0, x_min, x_max, linewidth=1, colors='black')
         axes.vlines(0, y_min, y_max, linewidth=1, colors='black')
 
     def _show_lines(self, axes, legend_props, x_min, x_max, y_min, y_max):
         """
-        Отвечает за отрисовку линий
+        Отвечает за отрисовку линий.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :param legend_props: Словарь объектов того, что должно быть в легенде, нужен только для контроля легенды,
-        :param x_min: Абсцисса начала прямой
-        :param x_max: Абсцисса конца прямой
-        :param y_min: Ордината начала прямой
-        :param y_max: Ордината конца прямой
-        :return: Ничего
+        :param legend_props: Словарь объектов того, что должно быть в легенде, нужен только для контроля легенды.
+        :param x_min: Абсцисса начала прямой.
+        :param x_max: Абсцисса конца прямой.
+        :param y_min: Ордината начала прямой.
+        :param y_max: Ордината конца прямой.
+        :return: Ничего.
         """
         for k, b, c, ls, label in self._lines_params:
             points = []
@@ -374,9 +376,9 @@ class Figure:
 
     def _show_func_graphs_after_fixing_axes(self, axes):
         """
-        Рисует точки на графике, для случая, когда мы подгоняем оси до отрисовки точек
+        Рисует точки на графике, для случая, когда мы подгоняем оси до отрисовки точек.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
-        :return: Ничего
+        :return: Ничего.
         """
         for x, y, line_style, colour, label in self._func_graphs_after_fixing_axes:
             axes.plot(x, y, color=colour, linestyle=line_style, label=label)
@@ -389,20 +391,25 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
     Данный метод считает два вида ошибок: вызываемый погрешностями и вызываемый статистикой.
     Если точки хорошо ложатся на прямую, то преобладать будет ошибка из-за погрешностей.
     Если точки измерены крайне точно, но на прямую они ложатся так себе, то преобладает статистическая ошибка.
-    Результирующей ошибкой выдаётся корень из суммы квадратов двух видов этих ошибок
-    :param x: Итерируемый объект с абсциссами точек
-    :param y: Итерируемый объект с ординатами точек
-    :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена
+    Результирующей ошибкой выдаётся корень из суммы квадратов двух видов этих ошибок.
+    :param x: Итерируемый объект с абсциссами точек.
+    :param y: Итерируемый объект с ординатами точек.
+    :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена.
     :param colour: цвет прямой 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
-    'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-    :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'
-    :param label: Название прямой для легенды
-    :return: Коэффициент наклона аппроксимированной прямой и её свободный коэффицент
+    'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
+    :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'.
+    :param label: Название прямой для легенды.
+    :return: Коэффициент наклона аппроксимированной прямой и её свободный коэффициент.
     """
-    if len(x) != len(y): raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
-    if len(x) == 0: raise ValueError('What should I do with no dots? Genius blyat!')
-    if len(x) == 1: raise ValueError('One dot!?!? Are you serious, Sam?')
-    if len(x) == 2: raise ValueError('There is no need in mnk if you have only 2 dots')
+    if len(x) != len(y):
+        raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
+    if len(x) == 0:
+        raise ValueError('What should I do with no dots? Genius blyat!')
+    if len(x) == 1:
+        raise ValueError('One dot!?!? Are you serious, Sam?')
+    if len(x) == 2:
+        raise ValueError('There is no need in mnk if you have only 2 dots')
+
     if not isinstance(x, GroupVar):
         x = GroupVar(x, 0)
     if not isinstance(y, GroupVar):
@@ -424,15 +431,15 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
 def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colour: Optional[str] = None,
                  line_style: Optional[str] = None, label: Optional[str] = None) -> Var:
     """
-    Тот же самый мнк, но проводит линию через начало координат
-    :param x: Итерируемый объект с абсциссами точек
-    :param y: Итерируемый объект с ординатами точек
-    :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена
+    Тот же самый мнк, но проводит линию через начало координат.
+    :param x: Итерируемый объект с абсциссами точек.
+    :param y: Итерируемый объект с ординатами точек.
+    :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена.
     :param colour: цвет прямой 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
-    'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый
-    :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'
-    :param label: Название прямой для легенды
-    :return: Коэффицент наклона полученной прямой
+    'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
+    :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'.
+    :param label: Название прямой для легенды.
+    :return: Коэффициент наклона полученной прямой.
     """
     if len(x) != len(y):
         raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
@@ -444,16 +451,16 @@ def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colo
 
 
 def _find_stat_errors(x: array, y: array, k, b):
-    '''
-    Считатет и выводит статистическую ошибку ТОЛЬКО ДЛЯ ЛИНЕЙНОЙ ФУНКЦИИ
-    :param x: Массив с значениями по оси X
-    :param y: Массив с значениями по оси Y
-    :param k: Коэффицент наклона прямой, которую мы нааппроксимировали ранее
-    :param b: Свободный коэффицент прямой
-    :return: Ошибку для k и b соотвественно
-    '''
+    """
+    Считает и выводит статистическую ошибку ТОЛЬКО ДЛЯ ЛИНЕЙНОЙ ФУНКЦИИ.
+    :param x: Массив с значениями по оси X.
+    :param y: Массив с значениями по оси Y.
+    :param k: Коэффициент наклона прямой, которую мы нааппроксимировали ранее.
+    :param b: Свободный коэффициент прямой.
+    :return: Ошибку для k и b соответственно.
+    """
     if len(x) != len(y):
         raise TypeError('Количество абсцисс не совпадает с количеством ординат!')
-    Sy = sum((y - b - k * x) ** 2) / (len(x) - 2)
-    D = len(x) * sum(x ** 2) - (sum(x)) ** 2
-    return sqrt(Sy * len(x) / D), sqrt(Sy * sum(x ** 2) / D)
+    sy = sum((y - b - k * x) ** 2) / (len(x) - 2)
+    d = len(x) * sum(x ** 2) - (sum(x)) ** 2
+    return sqrt(sy * len(x) / d), sqrt(sy * sum(x ** 2) / d)
