@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import reduce
-from tkinter.messagebox import showwarning
+from tkinter.messagebox import showwarning, showerror
 from typing import Optional, Tuple, Union, Callable, SupportsFloat, Sequence
 
 import matplotlib.patches as _mp
@@ -95,7 +95,8 @@ class Figure:
     def line(self, k: Union[float, int, Var], b: Union[float, int, Var], colour: Optional[str] = None,
              line_style: Optional[str] = None, label: Optional[str] = None) -> Figure:
         """
-        Строит наклонную прямую с заданными коэффициентами вида y = kx + b.
+        Строит наклонную прямую с заданными коэффициентами вида y = kx + b. Является вспомогательным объектом, т. е. не
+        будет подгонять под себя масштаб осей.
         :param k: Коэффициент наклона прямой.
         :param b: Свободный член прямой.
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
@@ -114,7 +115,8 @@ class Figure:
     def v_line(self, x: Union[float, int, Var], colour: Optional[str] = None, line_style: Optional[str] = None,
                label: Optional[str] = None) -> Figure:
         """
-        Строит вертикальную прямую через весь график.
+        Строит вертикальную прямую через весь график. вляется вспомогательным объектом, т. е. не будет подгонять
+        под себя масштаб осей.
         :param x: Абсцисса прямой.
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
         'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
@@ -128,7 +130,8 @@ class Figure:
     def h_line(self, y: Union[float, int, Var], colour: Optional[str] = None, line_style: Optional[str] = None,
                label: Optional[str] = None) -> Figure:
         """
-        Строит горизонтальную прямую через весь график.
+        Строит горизонтальную прямую через весь график. Является вспомогательным объектом, т. е. не будет подгонять
+        под себя масштаб осей.
         :param y: Ордината прямой.
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
         'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
@@ -144,7 +147,9 @@ class Figure:
                    label: Optional[str] = None, add_before_fixing_axes: bool = True) -> Figure:
         """
         todo: сделать возможность проводить линию до края графика по оси x влево или вправо, если указано None;
-        Отвечает за создание графика данной функции на экране.
+        Отвечает за создание графика данной функции на экране. Может являться как основным,
+        так и второстепенным объектом, в зависимости от значения параметра add_before_fixing_axes,
+        если он False - то основной объект и наоборот.
         :param func: Принимает функцию, получающую массив, выводящую массив.
         :param x_min: Наименьшее значение по оси X.
         :param x_max: Наибольшее значение по оси X.
@@ -323,7 +328,6 @@ class Figure:
                 set_label('$' + label + '$', label_prop)
                 if self.label_near_arrow is True:
                     axis.set_label_coords(*label_coords)
-
     @staticmethod
     def _arrows(axes):
         """
@@ -351,7 +355,7 @@ class Figure:
 
     def _show_lines(self, axes, legend_props, x_min, x_max, y_min, y_max):
         """
-        Отвечает за отрисовку линий.
+        Отвечает за отрисовку ВСПОМОГАТЕЛЬНЫХ линий.
         :param axes: Область, на которой отражаются все графики, оси и т.п.
         :param legend_props: Словарь объектов того, что должно быть в легенде, нужен только для контроля легенды.
         :param x_min: Абсцисса начала прямой.
@@ -370,6 +374,13 @@ class Figure:
                 points.append(((y_max - b) / k, y_max))
             if len(points) < 2 and x_min < (y_min - b) / k < x_max:
                 points.append(((y_min - b) / k, y_min))
+            if len(points) < 2:
+                showwarning("Ваша прямая не помещается на график!", "Прямая с параметрами k =" + k + " , b = " + b +
+                            "не помещается на график и не будет отрисована. Связано это с тем, что функция line() " +
+                            "предназначена для построения вспомогательных линий, а не основных, так что она не " +
+                            "подгоняет под себя масштаб осей, для этого используйте func_graph с параметром " +
+                            "add_before_fixing_axes=False")
+                return
             axes.plot((points[0][0], points[1][0]), (points[0][1], points[1][1]), c=c, ls=ls, label=label)
         if len(axes.get_legend_handles_labels()[1]) != 0:
             plt.legend(**legend_props)
