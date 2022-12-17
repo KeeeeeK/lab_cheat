@@ -44,7 +44,7 @@ def shredder(dataf: pd.DataFrame, constants_needed=False, show_result=False):
         try:
             if pd.isna(dataf.iloc[0, 2]):
                 raise TypeError("Ошибка форматирования данных: Константы должны быть с погрешностью")
-        except:
+        except IndexError:
             raise TypeError("Ошибка форматирования данных: Константа должна быть хотя бы одна")
 
         i = 0
@@ -228,7 +228,7 @@ def _table_check(cord_v, data: pd.DataFrame):
         try:
             e1 = data.iloc[cord_v[0], cord_v[1] + 1]
             e2 = data.iloc[cord_v[0], cord_v[1] + 2]
-        except:
+        except IndexError:
             raise TypeError("При рассмотрении таблицы с верхним левым углом в", cord_v, "произошла ошибка.",
                             "Программа рассматривает её как набор констант, но у неё не хватает столбцов,"
                             "должно быть 3: с названием <str>, со значением <int, float> и с погрешностью <int, float>")
@@ -315,11 +315,11 @@ def show_df(df):
     edge_color = 'w'
     bbox = [0, 0, 1, 1]
     header_columns = 0
-    ax = None
-    if ax is None:
-        size = (array(df.shape[::-1]) + array([0, 1])) * array([col_width, row_height])
-        fig, ax = plt.subplots(figsize=size)
-        ax.axis('off')
+
+    size = (array(df.shape[::-1]) + array([0, 1])) * array([col_width, row_height])
+    fig, ax = plt.subplots(figsize=size)
+    ax.axis('off')
+
     mpl_table = ax.table(cellText=df.values, bbox=bbox, colLabels=df.columns)
     mpl_table.auto_set_font_size(False)
     mpl_table.set_fontsize(font_size)
@@ -331,4 +331,3 @@ def show_df(df):
         else:
             cell.set_facecolor(row_colors[k[0] % len(row_colors)])
     plt.show()
-
