@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import reduce
-from tkinter.messagebox import showwarning, showerror
+from tkinter.messagebox import showwarning
 from typing import Optional, Tuple, Union, Callable, SupportsFloat, Sequence
 
 import matplotlib.patches as _mp
@@ -115,7 +115,7 @@ class Figure:
     def v_line(self, x: Union[float, int, Var], colour: Optional[str] = None, line_style: Optional[str] = None,
                label: Optional[str] = None) -> Figure:
         """
-        Строит вертикальную прямую через весь график. вляется вспомогательным объектом, т. е. не будет подгонять
+        Строит вертикальную прямую через весь график. Является вспомогательным объектом, т. е. не будет подгонять
         под себя масштаб осей.
         :param x: Абсцисса прямой.
         :param colour: цвет линии 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
@@ -328,6 +328,7 @@ class Figure:
                 set_label('$' + label + '$', label_prop)
                 if self.label_near_arrow is True:
                     axis.set_label_coords(*label_coords)
+
     @staticmethod
     def _arrows(axes):
         """

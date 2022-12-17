@@ -21,15 +21,16 @@ def rus_tex_formula(formula: str) -> str:
     return ret
 
 
-def to_table(Exel: str, transpose=False) -> List[List[float]]:
+def to_table(exel: str, transpose=False) -> List[List[float]]:
     """
     Поглощает Excel файл в массивчик элементов
-    :param Exel: Путь к файлу Excel
+    :param exel: Путь к файлу Excel
     :param transpose: Транспонировать ли?
     :return: 2 мерный массив со столбцами и строками из файла Excel
     """
-    table = tuple(map(lambda x: x.split('\t'), Exel.split('\n')))[:-1]
-    if transpose: table = list(zip(*table))
+    table = tuple(map(lambda x: x.split('\t'), exel.split('\n')))[:-1]
+    if transpose:
+        table = list(zip(*table))
     return [[float(table[j][i]) for j in range(len(table)) if table[j][i] != ''] for i in range(len(table[0]))]
 
 
@@ -37,6 +38,7 @@ class TexTable:
     """
     Класс с табличкой теха, с помощью функций данного класса можно слепить Теховскую табличку
     """
+
     def __init__(self):
         self._numbers: List[Tuple[str, ...], ...] = []
         self._titles: List[str, ...] = []
@@ -81,12 +83,12 @@ class TexTable:
         """
         self._titles = [''] + self._titles
         max_num = max(map(len, self._numbers))
-        self._numbers = [tuple(str(i) for i in range(1, max_num+1))] + self._numbers
+        self._numbers = [tuple(str(i) for i in range(1, max_num + 1))] + self._numbers
 
     def _begin(self):
         return "\\begin{center} \n" + \
                "\\textbf{Таблица @} \\\\ \n" + \
-               "\\begin{tabular}{|"+"".join(['c|'] * len(self._titles)) + "}\n"
+               "\\begin{tabular}{|" + "".join(['c|'] * len(self._titles)) + "}\n"
 
     def _write_titles(self, colours):
         return "\\hline\n" + \
@@ -119,11 +121,13 @@ class TexTable:
         text_tk = tk.Text(width=100, height=30, wrap=tk.WORD)
         text_tk.insert(float(0), text)
         text_tk.pack(expand=tk.YES, fill=tk.BOTH)
+
         # ctrl+A does not mean selecting all automatically, that's why i make it by myself
 
         def select_all(event):
             event.widget.tag_add(tk.SEL, '1.0', tk.END)
             return 'break'
+
         text_tk.bind('<Control-a>', select_all)
         root.mainloop()
 
