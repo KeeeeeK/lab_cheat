@@ -26,59 +26,11 @@ def read_data():
     return None
 
 
-def shredder(dataf: pd.DataFrame, constants_needed=False, show_result=False):
+def shredder(dataf: pd.DataFrame, show_result=False):
     """
-    Забирает константы из таблицы DataFrame и режет её на маленькие таблички по столбцам pd.na
-    :param dataf: Правильно отформатированная таблица.
-    :param constants_needed: Есть ли в ней константы, которые нужно употребить.
-    :param show_result: Нужно ли вывести, на какие таблички был поделен документ.
-    :return: словарь с константами в формате Var и список с каждой табличкой отдельно.
-    """
-    # FIXME: Починить с изменением read_data(), теперь первая строка не названия столбцов
-    const = {}
-    size_dataf = dataf.shape
-    columns = dataf.columns
-    if constants_needed:
-        if not ('Unnamed: 0' in columns and 'Unnamed: 1' in columns):
-            raise TypeError("Ошибка форматирования данных: Первая строка констант должна быть пустой")
-        try:
-            if pd.isna(dataf.iloc[0, 2]):
-                raise TypeError("Ошибка форматирования данных: Константы должны быть с погрешностью")
-        except IndexError:
-            raise TypeError("Ошибка форматирования данных: Константа должна быть хотя бы одна")
-
-        i = 0
-        while i < size_dataf[0] and not (pd.isna(dataf.iloc[i, 0])):
-            const[dataf.iloc[i, 0]] = Var(dataf.iloc[i, 1], dataf.iloc[i, 2])
-            i += 1
-        dataf = dataf.drop(['Unnamed: 0', 'Unnamed: 1', 'Unnamed: 2', 'Unnamed: 3'], axis=1)
-
-    columns = dataf.columns
-    datat = []
-    i_beg = 0
-    for i in range(len(columns)):
-        if 'Unnamed:' in columns[i]:
-            local_df = pd.DataFrame()
-            for j in range(i_beg, i):
-                local_df[columns[j]] = dataf[columns[j]]
-            i_beg = i + 1
-            local_df = local_df.dropna()
-            datat.append(local_df)
-
-        if i == len(columns) - 1:
-            local_df = pd.DataFrame()
-            for j in range(i_beg, i + 1):
-                local_df[columns[j]] = dataf[columns[j]]
-            local_df = local_df.dropna()
-            datat.append(local_df)
-    return const, datat
-
-
-def shredder_upd(dataf: pd.DataFrame, show_result=False):
-    """
-    Улучшенная версия shredder, сама ищет таблицы в DataFrame, дробит по таблицам максимальных размеров.
-    Для корректного ввода данных необходимо, чтобы все значения в таблицах были числового формата, а названия столбцов
-    тестового.
+    Функция, которая отвечает за нарезку листа на маленькие таблички. Сама ищет таблицы в DataFrame, дробит по таблицам
+    максимальных размеров. Для корректного ввода данных необходимо, чтобы все значения в таблицах были числового
+    формата, а названия столбцов - текстового.
     :param dataf: DataFrame, с данными вашей лабы, который нужно разделить на таблички
     (Обычно используется результат работы функции read_data).
     :param show_result: Нужно ли вывести, на какие таблички был поделен документ.
@@ -106,7 +58,7 @@ def shredder_upd(dataf: pd.DataFrame, show_result=False):
                     for i in table.iloc[0]:
                         name.append(i)
                     table.columns = name
-                    tables.append(table.iloc[1:])
+                    tables.append(deepcopy(table.iloc[1:]))
                 dataf = _table_del([m, n], cord_n, dataf)
     if show_result:
         if len(constants.keys()) != 0:
@@ -143,11 +95,14 @@ def get_into_groupvar_col_named(data_frame: pd.DataFrame):
     if len(data_frame.columns) == 0:
         raise TypeError("Столбцы не обнаружены, нужен хотя бы один")
     table = {}
-    for index in range(len(data_frame.columns) - 1):
+    for index in range(len(data_frame.columns)):
         if not ("delta" in data_frame.columns[index]):
-            if "delta" in data_frame.columns[index + 1]:
-                table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]],
-                                                            data_frame[data_frame.columns[index + 1]])
+            if index + 1 != len(data_frame.columns):
+                if "delta" in data_frame.columns[index + 1]:
+                    table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]],
+                                                                data_frame[data_frame.columns[index + 1]])
+                else:
+                    table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]], 0)
             else:
                 table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]], 0)
     return table
