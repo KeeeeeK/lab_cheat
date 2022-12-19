@@ -95,11 +95,14 @@ def get_into_groupvar_col_named(data_frame: pd.DataFrame):
     if len(data_frame.columns) == 0:
         raise TypeError("Столбцы не обнаружены, нужен хотя бы один")
     table = {}
-    for index in range(len(data_frame.columns) - 1):
+    for index in range(len(data_frame.columns)):
         if not ("delta" in data_frame.columns[index]):
-            if "delta" in data_frame.columns[index + 1]:
-                table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]],
-                                                            data_frame[data_frame.columns[index + 1]])
+            if index + 1 != len(data_frame.columns):
+                if "delta" in data_frame.columns[index + 1]:
+                    table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]],
+                                                                data_frame[data_frame.columns[index + 1]])
+                else:
+                    table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]], 0)
             else:
                 table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]], 0)
     return table
