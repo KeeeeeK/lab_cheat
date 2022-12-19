@@ -58,7 +58,7 @@ def shredder(dataf: pd.DataFrame, show_result=False):
                     for i in table.iloc[0]:
                         name.append(i)
                     table.columns = name
-                    tables.append(table.iloc[1:])
+                    tables.append(deepcopy(table.iloc[1:]))
                 dataf = _table_del([m, n], cord_n, dataf)
     if show_result:
         if len(constants.keys()) != 0:
