@@ -39,12 +39,6 @@ class Figure:
         если не указан, в легенде будут все элементы
         """
         self.x_label, self.y_label = x_label, y_label
-        if x_label != '' and x_label.count(',') == 0:
-            showwarning("Странное название оси X", "В названии оси X не обнаружена размерность, "
-                                                   "вряд ли график с такими подписями осей кому-то нужен")
-        if y_label != '' and y_label.count(',') == 0:
-            showwarning("Странное название оси Y", "В названии оси Y не обнаружена размерность, "
-                                                   "вряд ли график с такими подписями осей кому-то нужен")
         self.bold_axes = bold_axes
         self.zero_in_corner = zero_in_corner
         self.label_near_arrow = label_near_arrow
@@ -65,9 +59,9 @@ class Figure:
         t_x, t_y = False, False
         if x_label_coords is None:
             if len(x_label) <= 6:
-                self.x_label_coords = [1.01 + 0.01 * len(x_label) * 0.8, 0.05]
+                self.x_label_coords = [1.01 + 0.01 * len(x_label) * 0.8, 0.06]
             else:
-                self.x_label_coords = [1.01, - 0.08]
+                self.x_label_coords = [1.01, - 0.09]
                 t_x = True
         else:
             self.x_label_coords = x_label_coords
@@ -378,7 +372,7 @@ class Figure:
             if len(points) < 2:
                 showwarning("Ваша прямая не помещается на график!", "Прямая с параметрами k =" + str(k) + " , b = "
                             + str(b) + "не помещается на график и не будет отрисована. Связано это с тем, что функция" +
-                            "line() предназначена для построения вспомогательных линий, а не основных, так что она " +
+                            " line() предназначена для построения вспомогательных линий, а не основных, так что она " +
                             "не подгоняет под себя масштаб осей, для этого используйте func_graph с параметром " +
                             "add_before_fixing_axes=False")
                 return
