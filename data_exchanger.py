@@ -92,6 +92,7 @@ def get_into_groupvar_col_named(data_frame: pd.DataFrame):
     :param data_frame: Табличка в правильном виде (Получается из shredder)
     :return: Словарь, где ключи - названия столбцов с данными, а значения - GroupVar с данными
     """
+    # TODO: Сделать так, чтобы столбцы с delta могли иметь одинаковые названия
     if len(data_frame.columns) == 0:
         raise TypeError("Столбцы не обнаружены, нужен хотя бы один")
     table = {}
