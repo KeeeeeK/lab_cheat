@@ -119,7 +119,7 @@ def get_into_groupvar_col_last_err(data_frame: pd.DataFrame):
         raise TypeError("Столбцы не обнаружены, нужен хотя бы один")
     table = {}
     for index in range(len(data_frame.columns)):
-        table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]][0:-2],
+        table[data_frame.columns[index]] = GroupVar(data_frame[data_frame.columns[index]].iloc[0:-1],
                                                     data_frame[data_frame.columns[index]].iloc[-1])
     return table
 
