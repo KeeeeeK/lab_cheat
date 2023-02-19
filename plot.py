@@ -17,18 +17,21 @@ class Figure:
     Его объекты соответствуют figure matplotlib, т. е. один объект - полноценное окно с графиком
     """
 
-    def __init__(self, x_label: str = '', y_label: str = '', bold_axes: bool = True, zero_in_corner: bool = True,
+    def __init__(self, graph_name: str = '', x_label: str = '', y_label: str = '', name_on_main_field=True,
+                 bold_axes: bool = True, zero_in_corner: bool = True,
                  label_near_arrow: bool = True, my_func: Optional[Callable] = None,
                  x_label_coords: Sequence[SupportsFloat] = None,
                  y_label_coords: Sequence[SupportsFloat] = None,
                  legend_props: Optional[dict] = None):
         """
-        :param x_label: Подпись около оси X
-        :param y_label: Подпись около оси Y
-        :param bold_axes: Нужны ли жирные оси X и Y
+        :param graph_name: Название графика.
+        :param x_label: Подпись около оси X.
+        :param y_label: Подпись около оси Y.
+        :param name_on_main_field: Нужно ли в поле графика сделать надпись с его названием.
+        :param bold_axes: Нужны ли жирные оси X и Y.
         :param zero_in_corner: Нужно ли чтобы точка (0, 0) отображалась на графике, и в ней пересекались оси X и Y
         :param label_near_arrow: Если True: Названия будут отображаться в углу рядом с концами стрелок осей
-                                 Если False: Названия будут отображаться посередине осей
+                                 Если False: Названия будут отображаться посередине осей.
         :param my_func: функция, которая принимает объект класса matplotlib.axes._subplots.AxesSubplot как аргумент
         Будет вызвана до нормировки осей и рисования линий. Может быть использована для использования любых
         возможностей matplotlib.
@@ -36,9 +39,15 @@ class Figure:
         Легко двигать название (x_label) таким образом: figure.x_label_coords+=array([0.03, -0.04])
         :param y_label_coords: То же самое, что и x_label_coords
         :param legend_props: Словарь объектов того, что должно быть в легенде, нужен только для контроля легенды,
-        если не указан, в легенде будут все элементы
+        если не указан, в легенде будут все элементы.
         """
+        self._graph_name = graph_name
         self.x_label, self.y_label = x_label, y_label
+        if self._graph_name != '':
+            self._name_on_main_field = name_on_main_field
+        else:
+            self._name_on_main_field = False
+
         self.bold_axes = bold_axes
         self.zero_in_corner = zero_in_corner
         self.label_near_arrow = label_near_arrow
@@ -204,7 +213,7 @@ class Figure:
         Создаёт окно matplotlib и рисует в нём всё, что было в объекте.
         :return: Ничего.
         """
-        axes = plt.figure().add_subplot()
+        axes = plt.figure(self._graph_name).add_subplot()
         self._grid_lines(axes)
         self._show_plots(axes)
         self._show_func_graphs_before_fixing_axes(axes)
@@ -220,6 +229,8 @@ class Figure:
             self._bold_axes(axes, *xy_limits)
         self._show_lines(axes, self.legend_props, *xy_limits)
         self._show_func_graphs_after_fixing_axes(axes)
+        if self._name_on_main_field:
+            axes.title.set_text(self._graph_name)
         plt.show()
 
     @staticmethod
