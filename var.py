@@ -328,11 +328,14 @@ def suitable_accuracy(val: float, err: float) -> int:
     return Decimal.from_float(err * error_accuracy).adjusted()
 
 
-def normalize(var: Var, accuracy: Optional[int] = None) -> str:
+def normalize(var: Var, accuracy: Optional[int] = None, UTF_ed = False) -> str:
     """То же самое, что str(var), но Вы можете установить число цифр, которое будет показано, в параметре 'accuracy'"""
     val, err = var.val_err()
     if accuracy is None:
         accuracy = suitable_accuracy(val, err)
+    if UTF_ed:
+        return r'{0} ± {1}'.format(
+            *({True: float, False: int}[accuracy < 0](round(num, -accuracy)) for num in (val, err)))
     return r'{0} \pm {1}'.format(
         *({True: float, False: int}[accuracy < 0](round(num, -accuracy)) for num in (val, err)))
 
