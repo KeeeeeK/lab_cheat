@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from functools import reduce
-from tkinter.messagebox import showwarning
+from tkinter.messagebox import showwarning, askquestion
+from tkinter.filedialog import askdirectory
 from typing import Optional, Tuple, Union, Callable, SupportsFloat, Sequence
 
 import matplotlib.patches as _mp
 import matplotlib.pyplot as plt
 from numpy import array, linspace, sqrt
 
-from .var import Var, GroupVar
+from .var import Var, GroupVar, normalize
 
 
 class Figure:
@@ -17,18 +18,21 @@ class Figure:
     Его объекты соответствуют figure matplotlib, т. е. один объект - полноценное окно с графиком
     """
 
-    def __init__(self, x_label: str = '', y_label: str = '', bold_axes: bool = True, zero_in_corner: bool = True,
+    def __init__(self, graph_name: str = '', x_label: str = '', y_label: str = '', name_on_main_field=True,
+                 bold_axes: bool = True, zero_in_corner: bool = True,
                  label_near_arrow: bool = True, my_func: Optional[Callable] = None,
                  x_label_coords: Sequence[SupportsFloat] = None,
                  y_label_coords: Sequence[SupportsFloat] = None,
                  legend_props: Optional[dict] = None):
         """
-        :param x_label: Подпись около оси X
-        :param y_label: Подпись около оси Y
-        :param bold_axes: Нужны ли жирные оси X и Y
+        :param graph_name: Название графика.
+        :param x_label: Подпись около оси X.
+        :param y_label: Подпись около оси Y.
+        :param name_on_main_field: Нужно ли в поле графика сделать надпись с его названием.
+        :param bold_axes: Нужны ли жирные оси X и Y.
         :param zero_in_corner: Нужно ли чтобы точка (0, 0) отображалась на графике, и в ней пересекались оси X и Y
         :param label_near_arrow: Если True: Названия будут отображаться в углу рядом с концами стрелок осей
-                                 Если False: Названия будут отображаться посередине осей
+                                 Если False: Названия будут отображаться посередине осей.
         :param my_func: функция, которая принимает объект класса matplotlib.axes._subplots.AxesSubplot как аргумент
         Будет вызвана до нормировки осей и рисования линий. Может быть использована для использования любых
         возможностей matplotlib.
@@ -36,15 +40,15 @@ class Figure:
         Легко двигать название (x_label) таким образом: figure.x_label_coords+=array([0.03, -0.04])
         :param y_label_coords: То же самое, что и x_label_coords
         :param legend_props: Словарь объектов того, что должно быть в легенде, нужен только для контроля легенды,
-        если не указан, в легенде будут все элементы
+        если не указан, в легенде будут все элементы.
         """
+        self._graph_name = graph_name
         self.x_label, self.y_label = x_label, y_label
-        if x_label != '' and x_label.count(',') == 0:
-            showwarning("Странное название оси X", "В названии оси X не обнаружена размерность, "
-                                                   "вряд ли график с такими подписями осей кому-то нужен")
-        if y_label != '' and y_label.count(',') == 0:
-            showwarning("Странное название оси Y", "В названии оси Y не обнаружена размерность, "
-                                                   "вряд ли график с такими подписями осей кому-то нужен")
+        if self._graph_name != '':
+            self._name_on_main_field = name_on_main_field
+        else:
+            self._name_on_main_field = False
+
         self.bold_axes = bold_axes
         self.zero_in_corner = zero_in_corner
         self.label_near_arrow = label_near_arrow
@@ -60,14 +64,15 @@ class Figure:
         self._h_lines_params = []
         self._func_graphs_before_fixing_axes = []
         self._func_graphs_after_fixing_axes = []
+        self.texts = []
 
         # Выбираем место расположения названий осей
         t_x, t_y = False, False
         if x_label_coords is None:
             if len(x_label) <= 6:
-                self.x_label_coords = [1.01 + 0.01 * len(x_label) * 0.8, 0.05]
+                self.x_label_coords = [1.01 + 0.01 * len(x_label) * 0.8, 0.06]
             else:
-                self.x_label_coords = [1.01, - 0.08]
+                self.x_label_coords = [1.01, - 0.09]
                 t_x = True
         else:
             self.x_label_coords = x_label_coords
@@ -205,12 +210,18 @@ class Figure:
             dict(x=x_val, y=y_val, xerr=x_err, yerr=y_err, capsize=capsize, capthick=1, fmt='none', c=colour))
         return self
 
-    def show(self):
+    def text(self, x, y, text, colour=''):
+        self.texts.append((x, y, text, colour))
+
+    def show(self, save_graph=False, path=''):
         """
-        Создаёт окно matplotlib и рисует в нём всё, что было в объекте.
+        Создаёт окно matplotlib и рисует в нём всё, что было в объекте. Так же позволяет сохранять ваши графики в папку.
+        :param save_graph: Нужно ли сохранить график.
+        :param path: Путь к месту сохранения графика, передавать, если лень каждый раз выбирать папку.
         :return: Ничего.
         """
-        axes = plt.figure().add_subplot()
+        cur_fig = plt.figure(self._graph_name)
+        axes = cur_fig.add_subplot()
         self._grid_lines(axes)
         self._show_plots(axes)
         self._show_func_graphs_before_fixing_axes(axes)
@@ -226,6 +237,28 @@ class Figure:
             self._bold_axes(axes, *xy_limits)
         self._show_lines(axes, self.legend_props, *xy_limits)
         self._show_func_graphs_after_fixing_axes(axes)
+        if self._name_on_main_field:
+            axes.title.set_text(self._graph_name)
+        for i in self.texts:
+            if i[3] != '':
+                cur_fig.text(i[0], i[1], i[2], color=i[3])
+            else:
+                cur_fig.text(i[0], i[1], i[2])
+        if save_graph:
+            if path == '':
+                path = askdirectory()
+            over_write = True
+            file_exists = True
+            try:
+                f = open(path + "/" + self._graph_name + ".png")
+            except IOError:
+                file_exists = False
+            if file_exists:
+                if askquestion("Сохранение файла", "Вы уверены, что хотите перезаписать графики?") == "no":
+                    over_write = False
+            if over_write:
+                cur_fig.savefig(path + "/" + self._graph_name)
+
         plt.show()
 
     @staticmethod
@@ -378,7 +411,7 @@ class Figure:
             if len(points) < 2:
                 showwarning("Ваша прямая не помещается на график!", "Прямая с параметрами k =" + str(k) + " , b = "
                             + str(b) + "не помещается на график и не будет отрисована. Связано это с тем, что функция" +
-                            "line() предназначена для построения вспомогательных линий, а не основных, так что она " +
+                            " line() предназначена для построения вспомогательных линий, а не основных, так что она " +
                             "не подгоняет под себя масштаб осей, для этого используйте func_graph с параметром " +
                             "add_before_fixing_axes=False")
                 return
@@ -397,7 +430,7 @@ class Figure:
 
 
 def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Optional[Figure] = None,
-        colour: Optional[str] = None,
+        show_coefficients=True, colour: Optional[str] = None,
         line_style: Optional[str] = None, label: Optional[str] = None) -> Tuple[Var, Var]:
     """
     Данный метод считает два вида ошибок: вызываемый погрешностями и вызываемый статистикой.
@@ -407,6 +440,7 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
     :param x: Итерируемый объект с абсциссами точек.
     :param y: Итерируемый объект с ординатами точек.
     :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена.
+    :param show_coefficients: Нужно ли разместить вывести коэффициенты прямой на график.
     :param colour: цвет прямой 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
     'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
     :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'.
@@ -437,16 +471,19 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
              (*b_ex.val_err(), b_stat_err)]]
     if figure is not None:
         figure.line(k.val(), b.val(), colour=colour, line_style=line_style, label=label)
+        if show_coefficients:
+            figure.text(0, 0, "k = " + normalize(k, UTF_ed=True) + "\nb = " + normalize(b, UTF_ed=True))
     return k, b
 
 
-def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colour: Optional[str] = None,
-                 line_style: Optional[str] = None, label: Optional[str] = None) -> Var:
+def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, show_coefficients = True,
+                 colour: Optional[str] = None, line_style: Optional[str] = None, label: Optional[str] = None) -> Var:
     """
     Тот же самый мнк, но проводит линию через начало координат.
     :param x: Итерируемый объект с абсциссами точек.
     :param y: Итерируемый объект с ординатами точек.
     :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена.
+    :param show_coefficients: Нужно ли на самом графике показать коэффициенты МНК.
     :param colour: цвет прямой 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
     'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
     :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'.
@@ -459,6 +496,8 @@ def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colo
              reduce(lambda res, x_var: res + x_var * x_var, x[1:], x[0] * x[0])
     if figure is not None:
         figure.line(k.val(), 0, colour=colour, line_style=line_style, label=label)
+        if show_coefficients:
+            figure.text(0, 0, "k = " + normalize(k, UTF_ed=True))
     return k
 
 
