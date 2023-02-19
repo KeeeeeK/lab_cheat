@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from functools import reduce
-from tkinter.messagebox import showwarning
+from tkinter.messagebox import showwarning, askquestion
+from tkinter.filedialog import askdirectory
 from typing import Optional, Tuple, Union, Callable, SupportsFloat, Sequence
 
 import matplotlib.patches as _mp
@@ -212,9 +213,11 @@ class Figure:
     def text(self, x, y, text, colour=''):
         self.texts.append((x, y, text, colour))
 
-    def show(self):
+    def show(self, save_graph=False, path=''):
         """
-        Создаёт окно matplotlib и рисует в нём всё, что было в объекте.
+        Создаёт окно matplotlib и рисует в нём всё, что было в объекте. Так же позволяет сохранять ваши графики в папку.
+        :param save_graph: Нужно ли сохранить график.
+        :param path: Путь к месту сохранения графика, передавать, если лень каждый раз выбирать папку.
         :return: Ничего.
         """
         cur_fig = plt.figure(self._graph_name)
@@ -241,6 +244,21 @@ class Figure:
                 cur_fig.text(i[0], i[1], i[2], color=i[3])
             else:
                 cur_fig.text(i[0], i[1], i[2])
+        if save_graph:
+            if path == '':
+                path = askdirectory()
+            over_write = True
+            file_exists = True
+            try:
+                f = open(path + "/" + self._graph_name + ".png")
+            except IOError:
+                file_exists = False
+            if file_exists:
+                if askquestion("Сохранение файла", "Вы уверены, что хотите перезаписать графики?") == "no":
+                    over_write = False
+            if over_write:
+                cur_fig.savefig(path + "/" + self._graph_name)
+
         plt.show()
 
     @staticmethod
