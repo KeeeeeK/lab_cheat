@@ -8,7 +8,7 @@ import matplotlib.patches as _mp
 import matplotlib.pyplot as plt
 from numpy import array, linspace, sqrt
 
-from .var import Var, GroupVar
+from .var import Var, GroupVar, normalize
 
 
 class Figure:
@@ -63,6 +63,7 @@ class Figure:
         self._h_lines_params = []
         self._func_graphs_before_fixing_axes = []
         self._func_graphs_after_fixing_axes = []
+        self.texts = []
 
         # Выбираем место расположения названий осей
         t_x, t_y = False, False
@@ -208,12 +209,16 @@ class Figure:
             dict(x=x_val, y=y_val, xerr=x_err, yerr=y_err, capsize=capsize, capthick=1, fmt='none', c=colour))
         return self
 
+    def text(self, x, y, text, colour=''):
+        self.texts.append((x, y, text, colour))
+
     def show(self):
         """
         Создаёт окно matplotlib и рисует в нём всё, что было в объекте.
         :return: Ничего.
         """
-        axes = plt.figure(self._graph_name).add_subplot()
+        cur_fig = plt.figure(self._graph_name)
+        axes = cur_fig.add_subplot()
         self._grid_lines(axes)
         self._show_plots(axes)
         self._show_func_graphs_before_fixing_axes(axes)
@@ -231,6 +236,11 @@ class Figure:
         self._show_func_graphs_after_fixing_axes(axes)
         if self._name_on_main_field:
             axes.title.set_text(self._graph_name)
+        for i in self.texts:
+            if i[3] != '':
+                cur_fig.text(i[0], i[1], i[2], color=i[3])
+            else:
+                cur_fig.text(i[0], i[1], i[2])
         plt.show()
 
     @staticmethod
@@ -402,7 +412,7 @@ class Figure:
 
 
 def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Optional[Figure] = None,
-        colour: Optional[str] = None,
+        show_coefficients=True, colour: Optional[str] = None,
         line_style: Optional[str] = None, label: Optional[str] = None) -> Tuple[Var, Var]:
     """
     Данный метод считает два вида ошибок: вызываемый погрешностями и вызываемый статистикой.
@@ -412,6 +422,7 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
     :param x: Итерируемый объект с абсциссами точек.
     :param y: Итерируемый объект с ординатами точек.
     :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена.
+    :param show_coefficients: Нужно ли разместить вывести коэффициенты прямой на график.
     :param colour: цвет прямой 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
     'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
     :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'.
@@ -442,16 +453,19 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
              (*b_ex.val_err(), b_stat_err)]]
     if figure is not None:
         figure.line(k.val(), b.val(), colour=colour, line_style=line_style, label=label)
+        if show_coefficients:
+            figure.text(0, 0, "k = " + normalize(k, UTF_ed=True) + "\nb = " + normalize(b, UTF_ed=True))
     return k, b
 
 
-def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colour: Optional[str] = None,
-                 line_style: Optional[str] = None, label: Optional[str] = None) -> Var:
+def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, show_coefficients = True,
+                 colour: Optional[str] = None, line_style: Optional[str] = None, label: Optional[str] = None) -> Var:
     """
     Тот же самый мнк, но проводит линию через начало координат.
     :param x: Итерируемый объект с абсциссами точек.
     :param y: Итерируемый объект с ординатами точек.
     :param figure: Объект класса Figure, передаётся если мы хотим, чтобы эта прямая была построена.
+    :param show_coefficients: Нужно ли на самом графике показать коэффициенты МНК.
     :param colour: цвет прямой 'b' голубой, 'g' зелёный, 'r' красный, 'c' бирюзовый,
     'm' розовый, 'y' жёлтый, 'k' чёрный, 'w' белый.
     :param line_style: Стиль линии 'solid', 'dotted', 'dashed', 'dashdot'.
@@ -464,6 +478,8 @@ def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, colo
              reduce(lambda res, x_var: res + x_var * x_var, x[1:], x[0] * x[0])
     if figure is not None:
         figure.line(k.val(), 0, colour=colour, line_style=line_style, label=label)
+        if show_coefficients:
+            figure.text(0, 0, "k = " + normalize(k, UTF_ed=True))
     return k
 
 
