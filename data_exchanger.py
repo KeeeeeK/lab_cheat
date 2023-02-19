@@ -5,14 +5,22 @@ from tkinter.messagebox import showerror
 from numpy import isnan, nan, array
 from copy import deepcopy
 import matplotlib.pyplot as plt
+from sys import argv
 
 
-def read_data():
+def read_data(file_path=''):
     """
     Отвечает за открытие окошка с выбором файла и импортом его в программу.
+    :param file_path: Путь к файлу с данными лабы, который вы выбрали для анализа, если не передавать этот параметр,
+    программа выведет вам выбранный путь.
     :return: DataFrame с данными из файла, если файл не выбран, возвращает None
     """
-    file_path = askopenfilename(title="Выберите файл")
+    if file_path == '':
+        file_path = askopenfilename(title="Выберите файл")
+        print("Путь к вашему файлу:", file_path, "Чтобы скрыть это сообщение и не выбирать файл при каждом "
+                                                 "запуске программы, пожалуйста скопируйте "
+                                                 "данный путь в аргумент функции read_data"
+                                                 "\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     file_type = file_path.split(".")[-1]
     if file_path != '':
         if file_type in ["xls", "xlsx", "xlsm", "xlsb", "odf", "ods", "odt"]:
@@ -23,6 +31,7 @@ def read_data():
             showerror("Ошибка формата данных", "Неподдерживаемый формат данных")
             out_data = read_data()
         return out_data
+    print("Файл не выбран")
     return None
 
 
