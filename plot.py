@@ -227,7 +227,7 @@ class Figure:
         self._grid_lines(axes)
         self._show_plots(axes)
         self._show_func_graphs_before_fixing_axes(axes)
-        # maybe user wants to do something by himself
+        # Может быть пользователь хочет добавить что-то сам.
         if self.my_func is not None:
             self.my_func(axes)
         xy_limits = self._fix_axes(axes)
@@ -239,14 +239,20 @@ class Figure:
             self._bold_axes(axes, *xy_limits)
         self._show_lines(axes, self.legend_props, *xy_limits)
         self._show_func_graphs_after_fixing_axes(axes)
+
+        # Вывод названия на полотно графика.
         if self.name_on_main_field:
             axes.title.set_text(self.graph_name)
+
+        # Вывод пользовательского текста
+        # TODO: Править это говно, метод костыльный.
         for i in self.texts:
             if i[3] != '':
                 cur_fig.text(i[0], i[1], i[2], color=i[3])
             else:
                 cur_fig.text(i[0], i[1], i[2])
 
+        # Сохранение графика
         if save_graph:
             self._graph_saving(cur_fig, path)
 
