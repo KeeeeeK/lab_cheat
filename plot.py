@@ -42,12 +42,12 @@ class Figure:
         :param legend_props: Словарь объектов того, что должно быть в легенде, нужен только для контроля легенды,
         если не указан, в легенде будут все элементы.
         """
-        self._graph_name = graph_name
+        self.graph_name = graph_name
         self.x_label, self.y_label = x_label, y_label
-        if self._graph_name != '':
-            self._name_on_main_field = name_on_main_field
+        if self.graph_name != '':
+            self.name_on_main_field = name_on_main_field
         else:
-            self._name_on_main_field = False
+            self.name_on_main_field = False
 
         self.bold_axes = bold_axes
         self.zero_in_corner = zero_in_corner
@@ -216,11 +216,13 @@ class Figure:
     def show(self, save_graph=False, path=''):
         """
         Создаёт окно matplotlib и рисует в нём всё, что было в объекте. Так же позволяет сохранять ваши графики в папку.
+        При сохранении по умолчанию использует формат graph_name.png.
+        В случае существования такого предложит перезапись.
         :param save_graph: Нужно ли сохранить график.
         :param path: Путь к месту сохранения графика, передавать, если лень каждый раз выбирать папку.
         :return: Ничего.
         """
-        cur_fig = plt.figure(self._graph_name)
+        cur_fig = plt.figure(self.graph_name)
         axes = cur_fig.add_subplot()
         self._grid_lines(axes)
         self._show_plots(axes)
@@ -237,8 +239,8 @@ class Figure:
             self._bold_axes(axes, *xy_limits)
         self._show_lines(axes, self.legend_props, *xy_limits)
         self._show_func_graphs_after_fixing_axes(axes)
-        if self._name_on_main_field:
-            axes.title.set_text(self._graph_name)
+        if self.name_on_main_field:
+            axes.title.set_text(self.graph_name)
         for i in self.texts:
             if i[3] != '':
                 cur_fig.text(i[0], i[1], i[2], color=i[3])
@@ -251,6 +253,12 @@ class Figure:
         plt.show()
 
     def _graph_saving(self, mat_fig, path):
+        """
+        Внутренний метод, отвечающий за сохранение файла графика.
+        :param mat_fig: Текущая matplotlib.pyplot.figure, которую нужно сохранить.
+        :param path: Путь к файлу, который пользователь мог передать в функцию show.
+        :return: None
+        """
         if path == '':
             path = askdirectory()
             if path == '':
@@ -259,15 +267,14 @@ class Figure:
         over_write = True
         file_exists = True
         try:
-            open(path + "/" + self._graph_name + ".png")
+            open(path + "/" + self.graph_name + ".png")
         except IOError:
             file_exists = False
         if file_exists:
             if askquestion("Сохранение файла", "Вы уверены, что хотите перезаписать графики?") == "no":
                 over_write = False
         if over_write:
-            mat_fig.savefig(path + "/" + self._graph_name)
-
+            mat_fig.savefig(path + "/" + self.graph_name)
 
     @staticmethod
     def _grid_lines(axes):
