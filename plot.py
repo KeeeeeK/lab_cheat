@@ -259,7 +259,7 @@ class Figure:
         over_write = True
         file_exists = True
         try:
-            f = open(path + "/" + self._graph_name + ".png")
+            open(path + "/" + self._graph_name + ".png")
         except IOError:
             file_exists = False
         if file_exists:
