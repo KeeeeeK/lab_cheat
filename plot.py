@@ -244,22 +244,30 @@ class Figure:
                 cur_fig.text(i[0], i[1], i[2], color=i[3])
             else:
                 cur_fig.text(i[0], i[1], i[2])
+
         if save_graph:
-            if path == '':
-                path = askdirectory()
-            over_write = True
-            file_exists = True
-            try:
-                f = open(path + "/" + self._graph_name + ".png")
-            except IOError:
-                file_exists = False
-            if file_exists:
-                if askquestion("Сохранение файла", "Вы уверены, что хотите перезаписать графики?") == "no":
-                    over_write = False
-            if over_write:
-                cur_fig.savefig(path + "/" + self._graph_name)
+            self._graph_saving(cur_fig, path)
 
         plt.show()
+
+    def _graph_saving(self, mat_fig, path):
+        if path == '':
+            path = askdirectory()
+            if path == '':
+                showwarning("Сохранение файла", "Директория не выбрана, график не сохранён!")
+                return
+        over_write = True
+        file_exists = True
+        try:
+            f = open(path + "/" + self._graph_name + ".png")
+        except IOError:
+            file_exists = False
+        if file_exists:
+            if askquestion("Сохранение файла", "Вы уверены, что хотите перезаписать графики?") == "no":
+                over_write = False
+        if over_write:
+            mat_fig.savefig(path + "/" + self._graph_name)
+
 
     @staticmethod
     def _grid_lines(axes):
