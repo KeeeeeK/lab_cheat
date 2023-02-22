@@ -152,6 +152,8 @@ def quick_use_form(dictionary: dict, name_dct=None, index=None):
         raise TypeError("Функция quick_use_form в качестве 2ого аргумента вместо str получила", type(name_dct))
     if index is not None and type(index) != int:
         raise TypeError("Функция quick_use_form в качестве 3ого аргумента вместо int получила", type(index))
+    if len(dictionary.keys()) == 0:
+        return dictionary
 
     # Добавление в словарь ключей с отброшенной погрешностью
     keys_arr = list(dictionary.keys())
