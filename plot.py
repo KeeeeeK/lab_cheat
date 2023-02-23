@@ -1,15 +1,118 @@
 from __future__ import annotations
 
 from functools import reduce
-from tkinter.messagebox import showwarning, askquestion
+from tkinter.messagebox import showwarning, askquestion, showerror
 from tkinter.filedialog import askdirectory
 from typing import Optional, Tuple, Union, Callable, SupportsFloat, Sequence
 
 import matplotlib.patches as _mp
 import matplotlib.pyplot as plt
 from numpy import array, linspace, sqrt
+from math import ceil
 
 from .var import Var, GroupVar, normalize
+
+
+class GroupFigure:
+    def __init__(self, gr_big_graph_name: str = '', gr_x_label: str = '', gr_y_label: str = '',
+                 gr_name_on_main_field: bool = True, gr_bold_axes: bool = True, gr_zero_in_corner: bool = True,
+                 gr_label_near_arrow: bool = True,
+                 gr_x_label_coords: Sequence[SupportsFloat] = None,
+                 gr_y_label_coords: Sequence[SupportsFloat] = None,
+                 gr_legend_props: Optional[dict] = None):
+        """
+        Данный класс используется для создания нескольких, обычно однотипных графиков на одной странице
+        (Удобно при наличии похожих графиков для разных образцов). Ему передаются параметры, которые по умолчанию
+        унаследуют далее созданные в нём графики.
+        :param gr_big_graph_name: Название Большого полотна с графиками, единственный ненаследуемый параметр.
+        :param gr_x_label: Название оси X по умолчанию.
+        :param gr_y_label: Название оси Y по умолчанию.
+        :param gr_name_on_main_field: Нужно ли в поле каждого маленького графика сделать надпись с его названием.
+        :param gr_bold_axes: Нужны ли жирные оси X и Y по умолчанию для каждого маленького графика.
+        :param gr_zero_in_corner: Нужно ли чтобы точка (0, 0) отображалась на графике, и в ней пересекались оси X и Y
+                                  по умолчанию для каждого маленького графика.
+        :param gr_label_near_arrow: Если True: Названия будут отображаться в углу рядом с концами стрелок осей.
+                                    Если False: Названия будут отображаться посередине осей.
+        :param gr_x_label_coords: Координаты размещения названия оси X. (Выставляется автоматически,
+        используется в особых случаях). Легко двигать название (x_label) таким образом:
+        figure.x_label_coords+=array([0.03, -0.04])
+        :param gr_y_label_coords: То же самое, что и x_label_coords.
+        :param gr_legend_props: Словарь объектов того, что должно быть в легенде, нужен только для контроля легенды,
+        если не указан, в легенде будут все элементы. (Легенда для каждого маленького графика)
+        """
+        self.gr_big_graph_name = gr_big_graph_name
+        self.gr_x_label = gr_x_label
+        self.gr_y_label = gr_y_label
+        self.gr_name_on_main_field = gr_name_on_main_field
+        self.gr_bold_axes = gr_bold_axes
+        self.gr_zero_in_corner = gr_zero_in_corner
+        self.gr_label_near_arrow = gr_label_near_arrow
+        self.gr_x_label_coords = gr_x_label_coords
+        self.gr_y_label_coords = gr_y_label_coords
+        self.gr_legend_props = gr_legend_props
+        self.figures = []
+
+    def add(self, graph_name: str = None, x_label: str = None, y_label: str = None,
+            name_on_main_field: bool = None,
+            bold_axes: bool = None, zero_in_corner: bool = None,
+            label_near_arrow: bool = None, my_func: Optional[Callable] = None,
+            x_label_coords: Sequence[SupportsFloat] = None,
+            y_label_coords: Sequence[SupportsFloat] = None,
+            legend_props: Optional[dict] = None):
+        # При инициализации передаём дефолтные для набора атрибуты в случае не передачи данных пользователем.
+        if x_label is None:
+            x_label = self.gr_x_label
+        if y_label is None:
+            y_label = self.gr_y_label
+        if name_on_main_field is None:
+            name_on_main_field = self.gr_name_on_main_field
+        if bold_axes is None:
+            bold_axes = self.gr_bold_axes
+        if zero_in_corner is None:
+            zero_in_corner = self.gr_zero_in_corner
+        if label_near_arrow is None:
+            label_near_arrow = self.gr_label_near_arrow
+        if x_label_coords is None:
+            x_label_coords = self.gr_x_label_coords
+        if y_label_coords is None:
+            y_label_coords = self.gr_y_label_coords
+        if legend_props is None:
+            legend_props = self.gr_legend_props
+
+        self.figures.append(Figure(graph_name, x_label, y_label, name_on_main_field, bold_axes, zero_in_corner,
+                                   label_near_arrow, my_func, x_label_coords, y_label_coords, legend_props, True))
+
+    def show(self, save_graph: bool = False, path: str = '', form: tuple = None):
+        lenght = len(self.figures)
+        if lenght == 0:
+            showerror("Отрисовка графика", "В вашем GroupFigure нет ни одного графика! Рисовать нечего!")
+            return
+        if lenght == 1:
+            self.figures[0].show(save_graph, path)
+            return
+
+        # Определим, в какой форме лучше выстраивать графики
+        if form is None:
+            form = (ceil(lenght/2), 2)
+        else:
+            if lenght % 2 == 0 and form[1] * form[2] != lenght:
+                showerror("Отрисовка графика", "Вы передали методу show класса Group Figure в качестве параметра form "
+                          + str(form) + ". Так у вас получится " + str(form[0]*form[1]) + " ячеек, что не равно числу (" +
+                          str(lenght) + ") графика(ов).")
+                return
+            if lenght % 2 == 1 and form[1] * form[2] < lenght:
+                showerror("Отрисовка графика",
+                          "Вы передали методу show класса Group Figure в качестве параметра form " +
+                          str(form) + ". Так у вас получится " + str(form[0] * form[1]) + " ячеек, чего не хватит на ("
+                          + str(lenght) + ") графика(ов).")
+                return
+        cur_fig, axis = plt.subplots(form[0], form[1])
+        for index in range(lenght):
+            self.figures[index].print_on_fig(axis, index)
+        if lenght % 2 == 1:
+            axis[-1, -1].axis("off")
+        cur_fig.tight_layout()
+        plt.show()
 
 
 class Figure:
@@ -18,12 +121,13 @@ class Figure:
     Его объекты соответствуют figure matplotlib, т. е. один объект - полноценное окно с графиком
     """
 
-    def __init__(self, graph_name: str = '', x_label: str = '', y_label: str = '', name_on_main_field=True,
+    def __init__(self, graph_name: str = '', x_label: str = '', y_label: str = '', name_on_main_field: bool = True,
                  bold_axes: bool = True, zero_in_corner: bool = True,
                  label_near_arrow: bool = True, my_func: Optional[Callable] = None,
                  x_label_coords: Sequence[SupportsFloat] = None,
                  y_label_coords: Sequence[SupportsFloat] = None,
-                 legend_props: Optional[dict] = None):
+                 legend_props: Optional[dict] = None,
+                 for_multiple_graph: bool = False):
         """
         :param graph_name: Название графика.
         :param x_label: Подпись около оси X.
@@ -65,37 +169,9 @@ class Figure:
         self._func_graphs_before_fixing_axes = []
         self._func_graphs_after_fixing_axes = []
         self.texts = []
-
-        # Выбираем место расположения названий осей
-        t_x, t_y = False, False
-        if x_label_coords is None:
-            if len(x_label) <= 6:
-                self.x_label_coords = [1.01 + 0.01 * len(x_label) * 0.8, 0.06]
-            else:
-                self.x_label_coords = [1.01, - 0.09]
-                t_x = True
-        else:
-            self.x_label_coords = x_label_coords
-        if y_label_coords is None:
-            if len(y_label) <= 7:
-                self.y_label_coords = [-0.02 - 0.01 * (len(y_label) * 0.7), 1.03]
-            else:
-                self.y_label_coords = [0, 1.05]
-                t_y = True
-        else:
-            self.y_label_coords = y_label_coords
-        if t_x and t_y:
-            showwarning("Названия обеих осей слишком длинное",
-                        "Так как названия обеих осей очень длинное, оно не помещается в обычное место, поэтому "
-                        "рекомендуется установить параметру label_near_axes значение False")
-        elif t_x:
-            showwarning("Название оси X слишком длинное",
-                        "Так как название оси X очень длинное, оно не помещается в обычное место для него, поэтому "
-                        "рекомендуется установить параметру label_near_axes значение False")
-        elif t_y:
-            showwarning("Название оси Y слишком длинное",
-                        "Так как название оси Y очень длинное, оно не помещается в обычное место для него, поэтому "
-                        "рекомендуется установить параметру label_near_axes значение False")
+        self.for_multiple_graph = for_multiple_graph
+        self.x_label_coords = x_label_coords
+        self.y_label_coords = y_label_coords
 
     def line(self, k: Union[float, int, Var], b: Union[float, int, Var], colour: Optional[str] = None,
              line_style: Optional[str] = None, label: Optional[str] = None) -> Figure:
@@ -258,6 +334,28 @@ class Figure:
 
         plt.show()
 
+    def print_on_fig(self, axis, index):
+        axes = axis[index // 2, index % 2]
+        self._grid_lines(axes)
+        self._show_plots(axes)
+        self._show_func_graphs_before_fixing_axes(axes)
+        # Может быть пользователь хочет добавить что-то сам.
+        if self.my_func is not None:
+            self.my_func(axes)
+        xy_limits = self._fix_axes(axes)
+        self._v_lines(axes, *xy_limits)
+        self._h_lines(axes, *xy_limits)
+        self._set_label(axes)
+        self._arrows(axes)
+        if self.bold_axes is True:
+            self._bold_axes(axes, *xy_limits)
+        self._show_lines(axes, self.legend_props, *xy_limits)
+        self._show_func_graphs_after_fixing_axes(axes)
+
+        # Вывод названия на полотно графика.
+        if self.name_on_main_field:
+            axes.title.set_text(self.graph_name)
+
     def _graph_saving(self, mat_fig, path):
         """
         Внутренний метод, отвечающий за сохранение файла графика.
@@ -375,13 +473,42 @@ class Figure:
         :param axes: Область, на которой отражаются все графики, оси и т.п.
         :return: Ничего.
         """
-        for set_label, axis, label, label_coords in ((axes.set_xlabel, axes.xaxis, self.x_label, self.x_label_coords),
-                                                     (axes.set_ylabel, axes.yaxis, self.y_label, self.y_label_coords)):
-            if label.rstrip() != '':
-                label_prop = {True: dict(rotation=0), False: {}}[self.label_near_arrow]
-                set_label('$' + label + '$', label_prop)
-                if self.label_near_arrow is True:
-                    axis.set_label_coords(*label_coords)
+        if self.for_multiple_graph:
+            axes.set_xlabel(self.x_label, labelpad=2, fontsize='small', loc='right')
+            axes.set_ylabel(self.y_label, labelpad=2, fontsize='small', loc='top')
+        else:
+            t_x, t_y = False, False
+            if self.x_label_coords is None:
+                if len(self.x_label) <= 7:
+                    self.x_label_coords = [1.01 + 0.01 * len(self.x_label) * 0.8, 0.06]
+                else:
+                    self.x_label_coords = [1.01, - 0.09]
+                    t_x = True
+            if self.y_label_coords is None:
+                if len(self.y_label) <= 8:
+                    self.y_label_coords = [-0.02 - 0.01 * (len(self.y_label) * 0.7), 1.03]
+                else:
+                    self.y_label_coords = [0, 1.05]
+                    t_y = True
+            if t_x and t_y:
+                showwarning("Названия обеих осей слишком длинное",
+                            "Так как названия обеих осей очень длинное, оно не помещается в обычное место, поэтому "
+                            "рекомендуется установить параметру label_near_axes значение False")
+            elif t_x:
+                showwarning("Название оси X слишком длинное",
+                            "Так как название оси X очень длинное, оно не помещается в обычное место для него, поэтому "
+                            "рекомендуется установить параметру label_near_axes значение False")
+            elif t_y:
+                showwarning("Название оси Y слишком длинное",
+                            "Так как название оси Y очень длинное, оно не помещается в обычное место для него, поэтому "
+                            "рекомендуется установить параметру label_near_axes значение False")
+            for set_label, axis, label, label_coords in ((axes.set_xlabel, axes.xaxis, self.x_label, self.x_label_coords),
+                                                         (axes.set_ylabel, axes.yaxis, self.y_label, self.y_label_coords)):
+                if label.rstrip() != '':
+                    label_prop = {True: dict(rotation=0), False: {}}[self.label_near_arrow]
+                    set_label('$' + label + '$', label_prop)
+                    if self.label_near_arrow is True:
+                        axis.set_label_coords(*label_coords)
 
     @staticmethod
     def _arrows(axes):
@@ -497,7 +624,7 @@ def mnk(x: Union[GroupVar, Sequence], y: Union[GroupVar, Sequence], figure: Opti
     return k, b
 
 
-def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, show_coefficients = True,
+def mnk_through0(x: GroupVar, y: GroupVar, figure: Optional[Figure] = None, show_coefficients=True,
                  colour: Optional[str] = None, line_style: Optional[str] = None, label: Optional[str] = None) -> Var:
     """
     Тот же самый мнк, но проводит линию через начало координат.
