@@ -171,10 +171,6 @@ class Figure:
         self.x_label_coords = x_label_coords
         self.y_label_coords = y_label_coords
 
-    def _labels_pos(self, x_label_coords: tuple, y_label_coords: tuple, for_multipe_graph: bool = False):
-        if len(x_label_coords) != 0 and len(y_label_coords) != 0:
-            return x_label_coords, y_label_coords
-
     def line(self, k: Union[float, int, Var], b: Union[float, int, Var], colour: Optional[str] = None,
              line_style: Optional[str] = None, label: Optional[str] = None) -> Figure:
         """
