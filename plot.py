@@ -80,7 +80,7 @@ class GroupFigure:
             legend_props = self.gr_legend_props
 
         self.figures.append(Figure(graph_name, x_label, y_label, name_on_main_field, bold_axes, zero_in_corner,
-                                   label_near_arrow, my_func, x_label_coords, y_label_coords, legend_props))
+                                   label_near_arrow, my_func, x_label_coords, y_label_coords, legend_props, True))
 
     def show(self, save_graph: bool = False, path: str = '', form: tuple = None):
         lenght = len(self.figures)
@@ -125,7 +125,7 @@ class Figure:
                  x_label_coords: Sequence[SupportsFloat] = None,
                  y_label_coords: Sequence[SupportsFloat] = None,
                  legend_props: Optional[dict] = None,
-                 for_multipe_graph = False):
+                 for_multiple_graph: bool = False):
         """
         :param graph_name: Название графика.
         :param x_label: Подпись около оси X.
@@ -167,37 +167,9 @@ class Figure:
         self._func_graphs_before_fixing_axes = []
         self._func_graphs_after_fixing_axes = []
         self.texts = []
-
-        # Выбираем место расположения названий осей
-        t_x, t_y = False, False
-        if x_label_coords is None:
-            if len(x_label) <= 6:
-                self.x_label_coords = [1.01 + 0.01 * len(x_label) * 0.8, 0.06]
-            else:
-                self.x_label_coords = [1.01, - 0.09]
-                t_x = True
-        else:
-            self.x_label_coords = x_label_coords
-        if y_label_coords is None:
-            if len(y_label) <= 7:
-                self.y_label_coords = [-0.02 - 0.01 * (len(y_label) * 0.7), 1.03]
-            else:
-                self.y_label_coords = [0, 1.05]
-                t_y = True
-        else:
-            self.y_label_coords = y_label_coords
-        if t_x and t_y:
-            showwarning("Названия обеих осей слишком длинное",
-                        "Так как названия обеих осей очень длинное, оно не помещается в обычное место, поэтому "
-                        "рекомендуется установить параметру label_near_axes значение False")
-        elif t_x:
-            showwarning("Название оси X слишком длинное",
-                        "Так как название оси X очень длинное, оно не помещается в обычное место для него, поэтому "
-                        "рекомендуется установить параметру label_near_axes значение False")
-        elif t_y:
-            showwarning("Название оси Y слишком длинное",
-                        "Так как название оси Y очень длинное, оно не помещается в обычное место для него, поэтому "
-                        "рекомендуется установить параметру label_near_axes значение False")
+        self.for_multiple_graph = for_multiple_graph
+        self.x_label_coords = x_label_coords
+        self.y_label_coords = y_label_coords
 
     def _labels_pos(self, x_label_coords: tuple, y_label_coords: tuple, for_multipe_graph: bool = False):
         if len(x_label_coords) != 0 and len(y_label_coords) != 0:
@@ -503,14 +475,42 @@ class Figure:
         :param axes: Область, на которой отражаются все графики, оси и т.п.
         :return: Ничего.
         """
-        for set_label, axis, label, label_coords in ((axes.set_xlabel, axes.xaxis, self.x_label, self.x_label_coords),
-                                                     (axes.set_ylabel, axes.yaxis, self.y_label, self.y_label_coords)):
-            if label.rstrip() != '':
-                label_prop = {True: dict(rotation=0), False: {}}[self.label_near_arrow]
-                set_label('$' + label + '$', label_prop)
-                if self.label_near_arrow is True:
-                    axis.set_label_coords(*label_coords)
-
+        if self.for_multiple_graph:
+            axes.set_xlabel(self.x_label, labelpad=2, fontsize='small', loc='right')
+            axes.set_ylabel(self.y_label, labelpad=2, fontsize='small', loc='top')
+        else:
+            t_x, t_y = False, False
+            if self.x_label_coords is None:
+                if len(self.x_label) <= 7:
+                    self.x_label_coords = [1.01 + 0.01 * len(self.x_label) * 0.8, 0.06]
+                else:
+                    self.x_label_coords = [1.01, - 0.09]
+                    t_x = True
+            if self.y_label_coords is None:
+                if len(self.y_label) <= 8:
+                    self.y_label_coords = [-0.02 - 0.01 * (len(self.y_label) * 0.7), 1.03]
+                else:
+                    self.y_label_coords = [0, 1.05]
+                    t_y = True
+            if t_x and t_y:
+                showwarning("Названия обеих осей слишком длинное",
+                            "Так как названия обеих осей очень длинное, оно не помещается в обычное место, поэтому "
+                            "рекомендуется установить параметру label_near_axes значение False")
+            elif t_x:
+                showwarning("Название оси X слишком длинное",
+                            "Так как название оси X очень длинное, оно не помещается в обычное место для него, поэтому "
+                            "рекомендуется установить параметру label_near_axes значение False")
+            elif t_y:
+                showwarning("Название оси Y слишком длинное",
+                            "Так как название оси Y очень длинное, оно не помещается в обычное место для него, поэтому "
+                            "рекомендуется установить параметру label_near_axes значение False")
+            for set_label, axis, label, label_coords in ((axes.set_xlabel, axes.xaxis, self.x_label, self.x_label_coords),
+                                                         (axes.set_ylabel, axes.yaxis, self.y_label, self.y_label_coords)):
+                if label.rstrip() != '':
+                    label_prop = {True: dict(rotation=0), False: {}}[self.label_near_arrow]
+                    set_label('$' + label + '$', label_prop)
+                    if self.label_near_arrow is True:
+                        axis.set_label_coords(*label_coords)
 
     @staticmethod
     def _arrows(axes):
