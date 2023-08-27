@@ -46,14 +46,14 @@ def shredder(dataf: pd.DataFrame, show_result=False):
     :return: Возвращает dict с константами, ключи - названия констант, значения - объекты класса Var,
     т. е. числа + погрешности.
     """
-    if type(dataf) != pd.DataFrame:
+    if not isinstance(dataf, pd.DataFrame):
         raise TypeError("Функция shredder_upd получила на вход вместо pd.DataFrame", type(dataf))
     constants = {}
     tables = []
     for m in range(dataf.shape[0]):
         for n in range(dataf.shape[1]):
             obj = dataf.iloc[m, n]
-            logic = type(obj) == str
+            logic = isinstance(obj, str)
             if not logic:
                 logic = not isnan(dataf.iloc[m, n])
             if logic:
@@ -146,11 +146,11 @@ def quick_use_form(dictionary: dict, name_dct=None, index=None):
     :return: Словарь, дополненный упрощёнными ключами
     """
     # Проверка данных на корректность ввода
-    if type(dictionary) != dict:
+    if not isinstance(dictionary, dict):
         raise TypeError("Функция quick_use_form в качестве 1ого аргумента вместо dict получила", type(dictionary))
-    if name_dct is not None and type(name_dct) != str:
+    if name_dct is not None and not isinstance(name_dct, str):
         raise TypeError("Функция quick_use_form в качестве 2ого аргумента вместо str получила", type(name_dct))
-    if index is not None and type(index) != int:
+    if index is not None and not isinstance(index, int):
         raise TypeError("Функция quick_use_form в качестве 3ого аргумента вместо int получила", type(index))
     if len(dictionary.keys()) == 0:
         return dictionary
@@ -191,7 +191,7 @@ def _table_check(cord_v, data: pd.DataFrame):
     :param data: DataFrame, из которого нужно выделить таблицу.
     """
     cord_n = deepcopy(cord_v)
-    if type(data.iloc[cord_v[0] + 1, cord_v[1]]) == str or isnan(data.iloc[cord_v[0] + 1, cord_v[1]]):
+    if isinstance(data.iloc[cord_v[0] + 1, cord_v[1]], str) or isnan(data.iloc[cord_v[0] + 1, cord_v[1]]):
         try:
             e1 = data.iloc[cord_v[0], cord_v[1] + 1]
             e2 = data.iloc[cord_v[0], cord_v[1] + 2]
@@ -199,11 +199,11 @@ def _table_check(cord_v, data: pd.DataFrame):
             raise TypeError("При рассмотрении таблицы с верхним левым углом в", cord_v, "произошла ошибка.",
                             "Программа рассматривает её как набор констант, но у неё не хватает столбцов,"
                             "должно быть 3: с названием <str>, со значением <int, float> и с погрешностью <int, float>")
-        if type(e1) == str or isnan(e1):
+        if isinstance(e1, str) or isnan(e1):
             raise TypeError("При рассмотрении таблицы с верхним левым углом в", cord_v, "произошла ошибка.",
                             "Программа рассматривает её как набор констант, но во 2ом её столбце должно быть",
                             "значение константы, т. е. int или float, а не", e1)
-        if type(e2) == str or isnan(e2):
+        if isinstance(e2, str) or isnan(e2):
             raise TypeError("При рассмотрении таблицы с верхним левым углом в", cord_v, "произошла ошибка.",
                             "Программа рассматривает её как набор констант, но в 3ом её столбце должно быть",
                             "значение погрешности, т. е. int или float, а не", e2)
@@ -213,47 +213,47 @@ def _table_check(cord_v, data: pd.DataFrame):
         if not_last_str:
             val = data.iloc[cord_n[0] + 1, cord_n[1] + 1]
             err = data.iloc[cord_n[0] + 1, cord_n[1] + 2]
-            name_correct = type(data.iloc[cord_n[0] + 1, cord_n[1]]) == str
-            val_correct = type(val) != str and not isnan(val)
-            err_correct = type(err) != str and not isnan(err)
+            name_correct = isinstance(data.iloc[cord_n[0] + 1, cord_n[1]], str)
+            val_correct = not isinstance(val, str) and not isnan(val)
+            err_correct = not isinstance(err, str) and not isnan(err)
             while name_correct and val_correct and err_correct and not_last_str:
                 cord_n[0] += 1
                 not_last_str = not data.shape[0] - 1 == cord_n[0]
                 if not_last_str:
                     val = data.iloc[cord_n[0] + 1, cord_n[1] + 1]
                     err = data.iloc[cord_n[0] + 1, cord_n[1] + 2]
-                    name_correct = type(data.iloc[cord_n[0] + 1, cord_n[1]]) == str
-                    val_correct = type(val) != str and not isnan(val)
-                    err_correct = type(err) != str and not isnan(err)
+                    name_correct = isinstance(data.iloc[cord_n[0] + 1, cord_n[1]], str)
+                    val_correct = not isinstance(val, str) and not isnan(val)
+                    err_correct = not isinstance(val, str) and not isnan(err)
 
         cord_n[1] += 2
         return cord_n, True
     else:
         not_last_str = not data.shape[0] - 1 == cord_n[0]
-        value_type = type(data.iloc[cord_n[0] + 1, cord_n[1]])
-        while not_last_str and value_type in [int, float] and not isnan(data.iloc[cord_n[0] + 1, cord_n[1]]):
+        value_correct = isinstance(data.iloc[cord_n[0] + 1, cord_n[1]], (int, float))
+        while not_last_str and value_correct and not isnan(data.iloc[cord_n[0] + 1, cord_n[1]]):
             cord_n[0] += 1
             if data.shape[0] - 1 == cord_n[0]:
                 break
-            value_type = type(data.iloc[cord_n[0] + 1, cord_n[1]])
+            value_correct = isinstance(data.iloc[cord_n[0] + 1, cord_n[1]], (int, float))
 
         val = data.iloc[cord_n[0], cord_n[1] + 1]
         not_last_col = not data.shape[1] - 1 == cord_n[1]
-        val_correct = type(val) in [int, float] and not isnan(val)
+        val_correct = isinstance(val, (int, float)) and not isnan(val)
         not_diff_sized = True
         if data.shape[0] - 1 != cord_n[0]:
             next_num = data.iloc[cord_n[0] + 1, cord_n[1] + 1]
-            not_diff_sized = type(next_num) not in [int, float] or isnan(next_num)
+            not_diff_sized = isinstance(next_num, (int, float)) or isnan(next_num)
         if not_last_col:
             while not_last_col and val_correct and not_diff_sized:
                 cord_n[1] += 1
                 if data.shape[1] - 1 == cord_n[1]:
                     break
                 val = data.iloc[cord_n[0], cord_n[1] + 1]
-                val_correct = type(val) in [int, float] and not isnan(val)
+                val_correct = isinstance(val, (int, float)) and not isnan(val)
                 if data.shape[0] - 1 != cord_n[0]:
                     next_num = data.iloc[cord_n[0] + 1, cord_n[1] + 1]
-                    not_diff_sized = type(next_num) not in [int, float] or isnan(next_num)
+                    not_diff_sized = isinstance(next_num, (int, float)) or isnan(next_num)
         return cord_n, False
 
 
